@@ -1,0 +1,53 @@
+# Data Card — MatchMind Synthetic Football Events (generator v2)
+
+## What it is
+Fully **synthetic** football (soccer) event streams produced by `matchmind/generator.py`. Each match is a sequence of
+`kickoff`, `pass`, `carry`, `tackle`, `possession_change`, `shot`, `full_time` events with pitch coordinates (105×68 m),
+timestamps, outcomes, xG on shots, pressure flags, carry speed/distance and a late-game fatigue value.
+
+**No real data is used.** There is no scraped, licensed, tracking or broadcast data, and no real players, clubs, competitions or footage.
+Player names are random pairs of invented first/last names; team codes (`NOR`, `SOU`) are fictional.
+It is not Premier League data and must not be presented as such.
+
+## How to generate
+```bash
+python -m matchmind.dataset --out data/ --seeds 0-199 --random-styles
+```
+Output: `events.csv` (flat, one row per event), `events.jsonl` (full event objects), `matches.json` (per-match meta:
+seed, styles, formations, rosters, final score + summary). Same seeds and flags give byte-identical files.
+
+## Generative model (simple, by design)
+- Possession-chain random walk: each action is drawn with fixed probabilities and team-style adjustments.
+- **Team style** (0..1): `possession` lowers pass failure; `pressing` raises opponent pressure, duel rate and tackle win rate;
+  `directness` lengthens and widens forward pass distance (riskier).
+- **Formations**: `4-3-3`, `4-4-2`, `4-2-3-1`, `3-5-2`. These set roster positions; attackers (ST/LW/RW/AM) shoot more.
+  There is **no** spatial positional play.
+- **Fatigue**: 0 until 60', linear to 1 at 90'. Late game gives more pass errors, less pressing, more and slightly better shots, and lower sprint speeds.
+- **xG**: a logistic distance/angle model × a calibration factor. The model is not fit to real shots.
+
+## Calibration (200 seeds, random styles)
+| metric | synthetic | real top-flight reference (approx.) |
+|---|---|---|
+| goals / match | 2.58 | ~2.7–2.9 |
+| matches with 0–4 goals | 90% | ~85–90% |
+| shots / match | 29.5 | ~25 |
+| xG / match | 2.67 | ~2.7–3.0 |
+| passes / match | ~757 | ~850–950 |
+| tackles / match | ~99 | ~30–40 (ours counts every duel) |
+
+Numbers were tuned so aggregates *look* plausible. The match-to-match variance and the correlations between
+events were not validated against real data.
+
+## Known limitations / biases
+- Coordinates are always in the attacking frame of the team on the ball. There is no off-ball or tracking data and no set-pieces, cards, subs,
+  offsides or injuries. Goal kicks after shots are approximated.
+- There are no home advantage, score effects (game state) or player-level finishing skill beyond position.
+- "Tackle" counts all duels, so it is inflated compared with real tackle stats.
+- Formations change only roster composition, not shape.
+
+## Intended use
+Demos, testing and teaching for the MatchMind explainability pipeline (hackathon prototype). It is **not** for betting,
+scouting real players, or any claim about real football performance.
+
+## License
+MIT, same as the repository. Generated data is free to reuse.
