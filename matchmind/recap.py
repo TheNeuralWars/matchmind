@@ -23,7 +23,8 @@ def facts(meta, events):
     winner = None if sc[h] == sc[a] else (h if sc[h] > sc[a] else a)
     loser = None if not winner else (a if winner == h else h)
     pl = st.player
-    star_id = max(pl, key=lambda k: pl[k]["goals"] * 2 + pl[k]["xg"] + 0.01 * pl[k]["passes_ok"], default=None)
+    star_id = max(pl, key=lambda k: pl[k]["goals"] * 2 + pl[k]["xg"] + 0.01 * pl[k]["passes_ok"]
+                  + (1.5 if winner and meta["players"][k]["team"] == winner else 0), default=None)   # player of the match leans to the winners
     star = meta["players"][star_id]["name"] if star_id else None
     xg = {t: s["teams"][t]["xg"] for t in (h, a)}
     return {"home": h, "away": a, "score": sc, "winner": winner, "goals": goals, "reds": reds, "xg": xg,
