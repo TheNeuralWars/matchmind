@@ -30,4 +30,6 @@ AI scout + match narrator. Five-stage pipeline the rules ask for, verbatim: Inge
 ## Progress
 - **Wed 21 (done):** Generator v2 calibration (`GENERATOR_VERSION=2`): ~27 shots, ~2.6 xG, ~2.7 goals/match over 500 seeds; ~80% of matches 0–4 goals; seed 7 now 0-1 (was 5-3). Deterministic per seed. ✅
 - **Wed 21 (done):** Native ES/IT offline templates (`matchmind/i18n.py`) for Explainer, Narrator (analyst + casual registers) and recap; Foundry prompt asks for natural Spanish/Italian commentary. 15 stdlib tests pass. ✅
-- **Next:** formations/fatigue/team style params, JSONL dataset export + data card, UI language switch check, Foundry narrator live.
+- **Wed 21 (done):** Team styles (possession/pressing/directness), formations (4-3-3/4-4-2/4-2-3-1/3-5-2), late-game fatigue; recalibrated (200 seeds random styles: 2.58 goals, 90% 0–4). ✅
+- **Wed 21 (done):** Localised fallback when Narrator fails; `matchmind/dataset.py` CSV/JSONL export + `DATA_CARD.md`; server language switch verified via curl + `tests/test_server.py`; README quickstart. 27 tests pass. ✅
+- **Next:** Foundry narrator live test (needs Nico's Azure login + credit-funded sub with $0 budget alert); Agent Framework wrapper; MCP tool for match state; UI pitch map/momentum chart; screenshots; Container Apps deploy; CI.
