@@ -26,19 +26,20 @@ seed, styles, formations, rosters, final score + summary). Same seeds and flags 
 - **Set pieces**: fouls give free kicks. A foul in the central box area can be a penalty (xG 0.76, the best-rated outfielder takes it). A foul in the attacking third can lead to a direct free-kick shot. Saved or blocked shots and over-hit passes can win corners, and some corners produce a header (low xG). Each shot carries `meta.set_piece`.
 - **Cards**: fouls can lead to a yellow, a second yellow or a rare straight red. A sent-off player takes no further part, and the team with the extra player passes better and shoots slightly more.
 - **Score state**: the trailing team plays more directly and shoots slightly more, increasingly so late in the game. The leading team defends slightly more.
+- **Shot locations**: shooters cut inside (no byline shots); x ≤ 100.5 m, y within 8–60 m.
 - **xG**: a logistic distance/angle model × a calibration factor. The model is not fit to real shots.
 
 ## Calibration (300 seeds, random styles)
 | metric | synthetic | real top-flight reference (approx.) |
 |---|---|---|
-| goals / match | 2.66 (open play 2.09, set pieces ~0.58) | ~2.7–2.9 |
-| matches with 0–4 goals | 89% | ~85–90% |
+| goals / match | 2.57 (open play 1.98, set pieces ~0.58) | ~2.7–2.9 |
+| matches with 0–4 goals | 87% | ~85–90% |
 | shots / match | 32 (26 open play) | ~25 |
-| corners / match | 10.2 | ~10 |
-| penalties / match | 0.27 | ~0.25–0.3 |
+| corners / match | 10.1 | ~10 |
+| penalties / match | 0.34 | ~0.25–0.3 |
 | fouls / match | 16.7 | ~20–22 |
-| yellow / red cards per match | 2.7 / 0.13 | ~3.5–4 / ~0.1 |
-| tackles (non-foul duels) / match | 19.7 | ~30–35 |
+| yellow / red cards per match | 2.6 / 0.14 | ~3.5–4 / ~0.1 |
+| tackles (non-foul duels) / match | 19.6 | ~30–35 |
 | passes / match | ~808 | ~850–950 |
 
 Numbers were tuned so aggregates *look* plausible. The match-to-match variance and the correlations between

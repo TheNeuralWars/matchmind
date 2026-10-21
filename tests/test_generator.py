@@ -101,3 +101,8 @@ class SetPiecesCardsScoreState(unittest.TestCase):
             for e in ev:
                 if e["type"] == "shot" and e["outcome"] == "goal": g[e["team"]] = g.get(e["team"], 0) + 1
             self.assertEqual({k: v for k, v in ev[-1]["meta"]["score"].items() if v}, g)
+    def test_shot_locations_plausible(self):
+        for _, ev in self.runs:
+            for e in ev:
+                if e["type"] == "shot":
+                    self.assertLessEqual(e["x"], 100.5); self.assertTrue(8 <= e["y"] <= 60)

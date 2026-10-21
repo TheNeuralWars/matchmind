@@ -48,7 +48,7 @@ def xg_for(x, y):
 
 GENERATOR_VERSION = 3
 SHOT_BASE, SHOT_FWD_BONUS = 0.062, 0.02   # v3: ~26 open-play shots + set pieces
-FINISH_CAL = 0.62                           # v3: open play ~2.1 goals; set pieces add ~0.6
+FINISH_CAL = 0.74                           # v3: open play ~2.1 goals; set pieces add ~0.6
 
 def generate_match(seed=7, home="NOR", away="SOU", minutes=90, home_style=None, away_style=None):
     """Return (meta, events), deterministic for (seed, styles). Styles: see style_of()."""
@@ -102,7 +102,8 @@ def generate_match(seed=7, home="NOR", away="SOU", minutes=90, home_style=None, 
         pressure = rng.random() < 0.18 + 0.24 * ost["pressing"] - 0.10 * fat
         r = rng.random()
         if x > 80 and r < SHOT_BASE + (SHOT_FWD_BONUS if p.pos in ATTACKERS else 0) + 0.02 * fat + 0.01 * max(0, chase) + 0.02 * men:
-            sx, sy = min(104, x + rng.uniform(0, 8)), y
+            sx = min(100.5, max(78, rng.gauss(91, 5) if x > 95 else x + rng.uniform(-2, 6)))   # no byline shots
+            sy = max(8, min(60, 34 + (y - 34) * 0.55 + rng.gauss(0, 4)))                       # shooters cut inside
             goal, out = shoot(team, p, sx, sy, max(0.01, min(0.95, xg_for(sx, sy) * FINISH_CAL * (1 + 0.15 * fat))), "open_play", pressure)
             if not goal and out in ("saved", "blocked") and rng.random() < 0.28:
                 res = corner(team, opp)                    # corner may produce a second shot
@@ -143,8 +144,9 @@ def generate_match(seed=7, home="NOR", away="SOU", minutes=90, home_style=None, 
                     if goal: add(type="kickoff", team=team, player=outfield(team)[-1].id, x=52.5, y=34); x, y = 52.5, 34
                     else: x, y = 10, 34
                 elif x > 72 and rng.random() < 0.35:
-                    add(type="free_kick", team=team, player=p.id, x=round(x, 1), y=round(y, 1), meta={"kind": "direct"})
-                    goal, _ = shoot(team, p, x, y, max(0.02, xg_for(x, y) * 0.30), "free_kick")
+                    fx, fy = min(x, 88.0), max(14, min(54, y))         # fouls in the box that aren't pens → edge of area
+                    add(type="free_kick", team=team, player=p.id, x=round(fx, 1), y=round(fy, 1), meta={"kind": "direct"})
+                    goal, _ = shoot(team, p, fx, fy, max(0.02, xg_for(fx, fy) * 0.30), "free_kick")
                     team = opp
                     if goal: add(type="kickoff", team=team, player=outfield(team)[-1].id, x=52.5, y=34); x, y = 52.5, 34
                     else: x, y = 10, 34
