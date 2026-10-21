@@ -27,11 +27,15 @@ def xg_for(x, y):
     angle = math.atan2(7.32 * dx, dx * dx + dy * dy - (7.32 / 2) ** 2) if dist > 0 else 1.5
     return round(max(0.01, min(0.95, 1 / (1 + math.exp(-(-1.2 + 1.4 * abs(angle) - 0.09 * dist))))), 3)
 
+GENERATOR_VERSION = 2
+SHOT_BASE, SHOT_FWD_BONUS = 0.075, 0.025   # v2: ~24 shots/match (EPL avg ~25)
+FINISH_CAL = 0.80                           # v2: calibrates finishing so goals ~2.7/match (EPL avg ~2.8)
+
 def generate_match(seed=7, home="NOR", away="SOU", minutes=90, home_style=0.55):
     """Yield a deterministic event stream. home_style ~ share of possession tendency for the home team."""
     rng = random.Random(seed)
     squads = {home: make_team(home, rng), away: make_team(away, rng)}
-    meta = {"match_id": f"SYN-{seed}", "home": home, "away": away, "seed": seed,
+    meta = {"match_id": f"SYN-{seed}", "home": home, "away": away, "seed": seed, "generator_version": GENERATOR_VERSION,
             "players": {p.id: asdict(p) for s in squads.values() for p in s}}
     events, seq, t = [], 0, 0.0
     team = home
@@ -48,9 +52,9 @@ def generate_match(seed=7, home="NOR", away="SOU", minutes=90, home_style=0.55):
         p = rng.choice(side[1:])
         pressure = rng.random() < 0.3
         r = rng.random()
-        if x > 80 and r < 0.18 + (0.04 if p.pos in ("ST", "LW", "RW") else 0):
+        if x > 80 and r < SHOT_BASE + (SHOT_FWD_BONUS if p.pos in ("ST", "LW", "RW") else 0):
             sx, sy = x + rng.uniform(0, 8), y
-            xg = xg_for(min(sx, 104), sy)
+            xg = round(max(0.01, xg_for(min(sx, 104), sy) * FINISH_CAL), 3)
             goal = rng.random() < xg
             add(type="shot", team=team, player=p.id, x=round(min(sx, 104), 1), y=round(sy, 1), outcome="goal" if goal else rng.choice(["saved", "off_target", "blocked"]), xg=xg, pressure=pressure)
             team, x, y = opp, 52.5 if goal else 10, 34
