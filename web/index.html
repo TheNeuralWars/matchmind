@@ -1,17 +1,26 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MatchMind</title>
 <style>body{font-family:system-ui;background:#0b1020;color:#eef;margin:0;padding:20px}
-.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}select,button,input{padding:6px;border-radius:6px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}select,button,input{padding:6px;border-radius:6px}
 #sb{font-size:28px;font-weight:700}#mom{height:10px;background:#223;border-radius:5px;position:relative;margin:8px 0}
-#mom i{position:absolute;top:0;bottom:0;left:50%;background:#4cf;width:0}#cues div{background:#1a2340;border-left:4px solid #4cf;margin:6px 0;padding:8px;border-radius:4px}
-.grid{display:grid;grid-template-columns:minmax(300px,1fr) minmax(300px,1fr);gap:16px}@media(max-width:800px){.grid{grid-template-columns:1fr}}
-svg{width:100%;height:auto;background:#123d22;border-radius:8px}#chart{background:#141b33}.lg{font-size:12px;opacity:.8}
+#mom i{position:absolute;top:0;bottom:0;left:50%;background:#4cf;width:0}
+.cues div{background:#1a2340;border-left:4px solid #4cf;margin:6px 0;padding:8px;border-radius:4px}
+.cues.casual div{border-left-color:#fb4;font-size:17px}
+.grid{display:grid;grid-template-columns:minmax(300px,1fr) minmax(300px,1fr);gap:16px}
+body.split .grid{grid-template-columns:minmax(280px,.9fr) minmax(260px,1fr) minmax(260px,1fr)}
+@media(max-width:900px){.grid,body.split .grid{grid-template-columns:1fr}}
+.panel h3{margin:0 0 6px;font-size:15px;letter-spacing:.04em;text-transform:uppercase;opacity:.85}#p2{display:none}body.split #p2{display:block}
+.recap{background:#141b33;border-radius:8px;padding:10px;font-size:14px}.recap:empty{display:none}.recap .soc{margin-top:8px;padding:8px;border:1px dashed #4cf6;border-radius:6px}
+svg{width:100%;height:auto;background:#123d22;border-radius:8px}#chart{background:#141b33;margin-top:8px}.lg{font-size:12px;opacity:.8}
 .lg b{display:inline-block;width:10px;height:10px;border-radius:50%;margin:0 4px 0 10px;vertical-align:middle}
-small{opacity:.6}</style></head><body>
-<h2>MatchMind — synthetic match insights</h2>
-<div class="bar"><input id="seed" value="8" size="4"><select id="persona"><option value="casual">Casual fan</option><option value="analyst">Analyst</option></select>
+small{opacity:.6}.split-only{display:none}body.split .split-only{display:inline}body.split .single-only{display:none}</style></head><body>
+<h2>MatchMind — synthetic match insights <small id="vt"></small></h2>
+<div class="bar"><label>seed <input id="seed" value="8" size="3"></label>
+<select id="view"><option value="single">Single view</option><option value="split">Split: analyst vs casual</option></select>
+<span class="single-only"><select id="persona"><option value="casual">Casual fan</option><option value="analyst">Analyst</option></select></span>
 <select id="club"><option value="">No club</option><option>NOR</option><option>SOU</option></select>
-<select id="lang"><option>en</option><option>es</option><option>it</option></select><input id="speed" value="120" size="4" title="speed x">
-<button onclick="go()">Kick off</button></div>
+<select id="lang" title="language (left panel)"><option>en</option><option>es</option><option>it</option></select>
+<span class="split-only">casual: <select id="lang2" title="language (casual panel)"><option>en</option><option>es</option><option>it</option></select></span>
+<input id="speed" value="120" size="4" title="speed x"><button onclick="go()">Kick off</button></div>
 <div id="sb">–</div><div><small id="info"></small></div><div id="mom"><i></i></div>
 <div class="grid"><div>
  <svg id="pitch" viewBox="-2 -2 109 72" aria-label="Shot map"><g fill="none" stroke="#cfe" stroke-width=".4" opacity=".7">
@@ -23,27 +32,36 @@ small{opacity:.6}</style></head><body>
  <svg id="chart" viewBox="0 0 300 100" aria-label="Momentum chart"><line x1="0" y1="50" x2="300" y2="50" stroke="#556" stroke-width=".5"/>
   <text x="2" y="9" fill="#9ab" font-size="7" id="hl">home ↑</text><text x="2" y="97" fill="#9ab" font-size="7" id="al">away ↓</text>
   <polyline id="mline" fill="none" stroke="#4cf" stroke-width="1.2"/><g id="gmarks"></g></svg>
- <small>Shot map: dot size = xG, filled = goal. Home attacks →, away ←. Momentum chart: per minute, ⚽ = goal.</small>
-</div><div><div id="cues"></div><p id="recap"></p></div></div>
+ <small>Shot map: dot size = xG, filled = goal. Home attacks →, away ←. Momentum per minute, ⚽ = goal.</small>
+</div>
+<div class="panel" id="p1"><h3 id="p1h"></h3><div class="recap" id="recap1"></div><div class="cues" id="cues1"></div></div>
+<div class="panel" id="p2"><h3>Casual fan</h3><div class="recap" id="recap2"></div><div class="cues casual" id="cues2"></div></div></div>
 <script>
-const COL={};let es,H,A,pts=[];
-function go(){if(es)es.close();cues.innerHTML="";recap.textContent="";shots.innerHTML="";gmarks.innerHTML="";pts=[];mline.setAttribute('points','');
-const q=new URLSearchParams({seed:seed.value,persona:persona.value,club:club.value,lang:lang.value,speed:speed.value});
-es=new EventSource('/stream?'+q);
-es.addEventListener('meta',e=>{const m=JSON.parse(e.data);H=m.home;A=m.away;COL[H]='#4cf';COL[A]='#fb4';
- legend.innerHTML=`<b style="background:${COL[H]}"></b>${H} →<b style="background:${COL[A]}"></b>${A} ←`;hl.textContent=H+' ↑';al.textContent=A+' ↓'});
-es.addEventListener('state',e=>{const s=JSON.parse(e.data);sb.textContent=`${H} ${s.score[H]} – ${s.score[A]} ${A}  ${s.minute}'`;
- info.textContent=`xG ${s.teams[H].xg}-${s.teams[A].xg} · poss ${s.possession[H]}%-${s.possession[A]}% · chaos ${s.chaos}`;
- const b=document.querySelector('#mom i'),m=s.momentum;b.style.width=Math.abs(m)*50+'%';b.style.left=m>=0?'50%':(50-Math.abs(m)*50)+'%';
- const x=Math.min(300,s.minute*300/95);if(!pts.length||pts[pts.length-1][0]!==x){pts.push([x,50-m*46]);}else pts[pts.length-1][1]=50-m*46;
- mline.setAttribute('points',pts.map(p=>p.join(',')).join(' '))});
-es.addEventListener('shot',e=>{const s=JSON.parse(e.data),home=s.team===H,x=home?s.x:105-s.x,y=home?s.y:68-s.y,goal=s.outcome==='goal';
- const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',(0.8+Math.sqrt(s.xg)*4).toFixed(2));
- c.setAttribute('fill',goal?COL[s.team]:'none');c.setAttribute('stroke',COL[s.team]);c.setAttribute('stroke-width','.5');
- const t=document.createElementNS('http://www.w3.org/2000/svg','title');t.textContent=`${s.minute}' ${s.team} xG ${s.xg} ${s.outcome} (${s.set_piece})`;c.appendChild(t);shots.appendChild(c);
- if(goal){const g=document.createElementNS('http://www.w3.org/2000/svg','text');g.setAttribute('x',Math.min(292,s.minute*300/95));g.setAttribute('y',home?12:96);g.setAttribute('font-size','8');g.textContent='⚽';gmarks.appendChild(g)}});
-es.addEventListener('cue',e=>{const c=JSON.parse(e.data),d=document.createElement('div');d.innerHTML=`<b>${c.minute}'</b> ${c.text} <small>${c.template} · ${c.source}</small>`;cues.prepend(d)});
-es.addEventListener('recap',e=>{recap.textContent=JSON.parse(e.data).text;es.close()})}
-// Deep link for demos/screenshots: /?autostart=1&seed=7&persona=analyst&lang=es&speed=600
-{const u=new URLSearchParams(location.search);for(const k of ['seed','persona','club','lang','speed'])if(u.has(k))document.getElementById(k).value=u.get(k);if(u.has('autostart'))go();}
+const COL={},SVGNS='http://www.w3.org/2000/svg';let streams=[],H,A,pts=[];
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e}
+function reset(){streams.forEach(s=>s.close());streams=[];for(const id of['cues1','cues2','recap1','recap2','shots','gmarks'])document.getElementById(id).innerHTML='';pts=[];mline.setAttribute('points','')}
+function open(prof,cuesEl,recapEl,primary){
+ const q=new URLSearchParams({seed:seed.value,club:club.value,speed:speed.value,...prof});const es=new EventSource('/stream?'+q);streams.push(es);
+ es.addEventListener('meta',e=>{const m=JSON.parse(e.data);H=m.home;A=m.away;COL[H]='#4cf';COL[A]='#fb4';
+  legend.innerHTML=`<b style="background:${COL[H]}"></b>${H} →<b style="background:${COL[A]}"></b>${A} ←`;hl.textContent=H+' ↑';al.textContent=A+' ↓'});
+ if(primary){
+ es.addEventListener('state',e=>{const s=JSON.parse(e.data);sb.textContent=`${H} ${s.score[H]} – ${s.score[A]} ${A}  ${s.minute}'`;
+  info.textContent=`xG ${s.teams[H].xg}-${s.teams[A].xg} · poss ${s.possession[H]}%-${s.possession[A]}% · chaos ${s.chaos}`;
+  const b=document.querySelector('#mom i'),m=s.momentum;b.style.width=Math.abs(m)*50+'%';b.style.left=m>=0?'50%':(50-Math.abs(m)*50)+'%';
+  const x=Math.min(300,s.minute*300/95);if(!pts.length||pts[pts.length-1][0]!==x)pts.push([x,50-m*46]);else pts[pts.length-1][1]=50-m*46;
+  mline.setAttribute('points',pts.map(p=>p.join(',')).join(' '))});
+ es.addEventListener('shot',e=>{const s=JSON.parse(e.data),home=s.team===H,goal=s.outcome==='goal';
+  const c=el('circle',{cx:home?s.x:105-s.x,cy:home?s.y:68-s.y,r:(0.8+Math.sqrt(s.xg)*4).toFixed(2),fill:goal?COL[s.team]:'none',stroke:COL[s.team],'stroke-width':.5});
+  const t=el('title',{});t.textContent=`${s.minute}' ${s.team} xG ${s.xg} ${s.outcome} (${s.set_piece})`;c.appendChild(t);shots.appendChild(c);
+  if(goal){const g=el('text',{x:Math.min(292,s.minute*300/95),y:home?12:96,'font-size':8});g.textContent='⚽';gmarks.appendChild(g)}})}
+ es.addEventListener('cue',e=>{const c=JSON.parse(e.data),d=document.createElement('div');d.innerHTML=`<b>${c.minute}'</b> ${c.text} <small>${c.template} · ${c.source}</small>`;cuesEl.prepend(d)});
+ es.addEventListener('recap',e=>{const r=JSON.parse(e.data);recapEl.innerHTML=`<b>${r.text}</b><p>${r.article||''}</p>${r.social?`<div class="soc">📣 ${r.social}</div>`:''}`;es.close()})}
+function go(){reset();const split=view.value==='split';document.body.classList.toggle('split',split);
+ vt.textContent=split?'· same match, two fans':'';
+ if(split){p1h.textContent='Analyst';open({persona:'analyst',lang:lang.value},cues1,recap1,true);open({persona:'casual',lang:lang2.value},cues2,recap2,false)}
+ else{p1h.textContent=persona.options[persona.selectedIndex].text;open({persona:persona.value,lang:lang.value},cues1,recap1,true)}}
+view.onchange=()=>document.body.classList.toggle('split',view.value==='split');
+// Deep link for demos/screenshots: /?autostart=1&view=split&seed=8&lang=en&lang2=it&speed=600
+{const u=new URLSearchParams(location.search);for(const k of['seed','view','persona','club','lang','lang2','speed'])if(u.has(k))document.getElementById(k).value=u.get(k);
+ document.body.classList.toggle('split',view.value==='split');if(u.has('autostart'))go();}
 </script></body></html>

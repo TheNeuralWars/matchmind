@@ -2,6 +2,18 @@
 from .i18n import norm
 from .state import MatchState
 
+def star_id_of(meta, player_stats, score):
+    """Player of the match: goals, xG, completed passes; leans to the winning side. Shared by recap() and post_match()."""
+    h, a = meta["home"], meta["away"]
+    winner = None if score[h] == score[a] else (h if score[h] > score[a] else a)
+    pl = player_stats
+    return max(pl, key=lambda k: pl[k]["goals"] * 2 + pl[k]["xg"] + 0.01 * pl[k]["passes_ok"]
+               + (1.5 if winner and meta["players"][k]["team"] == winner else 0), default=None)
+
+def star_of(meta, player_stats, score):
+    k = star_id_of(meta, player_stats, score)
+    return meta["players"][k]["name"] if k else None
+
 def facts(meta, events):
     """Language-neutral match facts (all derivable from events)."""
     st = MatchState(meta)
@@ -23,8 +35,7 @@ def facts(meta, events):
     winner = None if sc[h] == sc[a] else (h if sc[h] > sc[a] else a)
     loser = None if not winner else (a if winner == h else h)
     pl = st.player
-    star_id = max(pl, key=lambda k: pl[k]["goals"] * 2 + pl[k]["xg"] + 0.01 * pl[k]["passes_ok"]
-                  + (1.5 if winner and meta["players"][k]["team"] == winner else 0), default=None)   # player of the match leans to the winners
+    star_id = star_id_of(meta, pl, sc)
     star = meta["players"][star_id]["name"] if star_id else None
     xg = {t: s["teams"][t]["xg"] for t in (h, a)}
     return {"home": h, "away": a, "score": sc, "winner": winner, "goals": goals, "reds": reds, "xg": xg,

@@ -21,7 +21,7 @@ class Server(unittest.TestCase):
         self.assertEqual(json.loads(self.get("/health")), {"ok": True})
         html = self.get("/")
         for l in ("en", "es", "it"): self.assertIn(f"<option>{l}</option>", html)
-        for frag in ('id="pitch"', 'id="chart"', "addEventListener('shot'", 'id="mline"'): self.assertIn(frag, html)
+        for frag in ('value="split"', 'id="cues2"', 'id="lang2"', 'id="pitch"', 'id="chart"', "addEventListener('shot'", 'id="mline"'): self.assertIn(frag, html)
     def test_shot_events(self):
         ev = self.events("en")
         shots = [d for e, d in ev if e == "shot"]
@@ -38,5 +38,8 @@ class Server(unittest.TestCase):
             self.assertIn(word, [d for e, d in ev if e == "recap"][0]["text"])
             texts[lang] = cues[0]["text"]
         self.assertEqual(len(set(texts.values())), 3)
+    def test_recap_has_article_and_social(self):
+        r = [d for e, d in self.events("it") if e == "recap"][0]
+        self.assertIn("Marcatori", r["article"]); self.assertIn("#MatchMind", r["social"])
 
 if __name__ == "__main__": unittest.main()

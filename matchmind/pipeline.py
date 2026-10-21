@@ -37,7 +37,7 @@ RECAP = {
 
 def recap(orch, lang="en"):
     st = orch.state.snapshot(); h, a = orch.meta["home"], orch.meta["away"]
-    top = max(orch.state.player.items(), key=lambda kv: kv[1]["xg"] + 2 * kv[1]["goals"], default=(None, {}))
-    star = orch.meta["players"][top[0]]["name"] if top[0] else "n/a"
+    from .recap import star_of
+    star = star_of(orch.meta, orch.state.player, st["score"]) or "n/a"
     return RECAP[norm(lang)].format(h=h, a=a, hs=st["score"][h], as_=st["score"][a], hx=st["teams"][h]["xg"], ax=st["teams"][a]["xg"],
                                     hp=st["possession"][h], ap=st["possession"][a], star=star)

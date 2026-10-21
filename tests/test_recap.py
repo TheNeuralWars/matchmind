@@ -29,6 +29,11 @@ class Recap(unittest.TestCase):
         self.assertIn("(pen.)", es["article"]); self.assertIn("(rig.)", it["article"])
         m0, ev0 = self.ms[5]                     # 0-0
         self.assertIn("0-0", post_match(m0, ev0, "it")["article"]); self.assertIn("sin goles", post_match(m0, ev0, "es")["article"])
+    def test_star_consistent_with_live_recap(self):
+        from matchmind.pipeline import Orchestrator, recap
+        m, ev = self.ms[8]; o = Orchestrator(m, {})
+        for e in ev: o.step(e)
+        self.assertIn(post_match(m, ev)["facts"]["star"], recap(o))
     def test_social_limit(self):
         m, ev = self.ms[8]; self.assertLessEqual(len(social(facts(m, ev), "es", limit=60)), 60)
 
