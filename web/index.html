@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><title>MatchMind</title>
+<style>body{font-family:system-ui;background:#0b1020;color:#eef;margin:0;padding:20px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}select,button,input{padding:6px;border-radius:6px}
+#sb{font-size:28px;font-weight:700}#mom{height:10px;background:#223;border-radius:5px;position:relative;margin:8px 0}
+#mom i{position:absolute;top:0;bottom:0;left:50%;background:#4cf;width:0}#cues div{background:#1a2340;border-left:4px solid #4cf;margin:6px 0;padding:8px;border-radius:4px}
+small{opacity:.6}</style></head><body>
+<h2>MatchMind — synthetic match insights</h2>
+<div class="bar"><input id="seed" value="7" size="4"><select id="persona"><option value="casual">Casual fan</option><option value="analyst">Analyst</option></select>
+<select id="club"><option value="">No club</option><option>NOR</option><option>SOU</option></select>
+<select id="lang"><option>en</option><option>es</option><option>it</option></select><input id="speed" value="120" size="4" title="speed x">
+<button onclick="go()">Kick off</button></div>
+<div id="sb">–</div><div><small id="info"></small></div><div id="mom"><i></i></div><div id="cues"></div><p id="recap"></p>
+<script>let es;function go(){if(es)es.close();cues.innerHTML="";recap.textContent="";
+const q=new URLSearchParams({seed:seed.value,persona:persona.value,club:club.value,lang:lang.value,speed:speed.value});
+es=new EventSource('/stream?'+q);let H,A;es.addEventListener('meta',e=>{const m=JSON.parse(e.data);H=m.home;A=m.away});
+es.addEventListener('state',e=>{const s=JSON.parse(e.data);sb.textContent=`${H} ${s.score[H]} – ${s.score[A]} ${A}  ${s.minute}'`;
+info.textContent=`xG ${s.teams[H].xg}-${s.teams[A].xg} · poss ${s.possession[H]}%-${s.possession[A]}% · chaos ${s.chaos}`;
+const b=document.querySelector('#mom i'),m=s.momentum;b.style.width=Math.abs(m)*50+'%';b.style.left=m>=0?'50%':(50-Math.abs(m)*50)+'%'});
+es.addEventListener('cue',e=>{const c=JSON.parse(e.data),d=document.createElement('div');d.innerHTML=`<b>${c.minute}'</b> ${c.text} <small>${c.template} · ${c.source}</small>`;cues.prepend(d)});
+es.addEventListener('recap',e=>{recap.textContent=JSON.parse(e.data).text;es.close()})}</script></body></html>
