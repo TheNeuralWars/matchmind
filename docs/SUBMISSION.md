@@ -2,6 +2,7 @@
 
 **Links**
 - Repo (public): https://github.com/TheNeuralWars/matchmind
+- **Live app on Azure (Container Apps, live Azure OpenAI narration):** https://matchmind.yellowcoast-55678069.swedencentral.azurecontainerapps.io/?autostart=1&view=split&seed=8&lang=en&lang2=it (scales to zero, so the first load can take ~20 s).
 - **Test link (free, no login):** https://theneuralwars.github.io/matchmind/ is a static replay of the real pipeline, rebuilt by GitHub Actions on every push. Try `?autostart=1&view=split&seed=8&lang=en&lang2=it`.
 - Demo video (< 2 min): *YouTube URL to add after upload*
 - Categories: **Grand Prize** + **Best Multi-Agent System** (primary). Fallback: Best Use of Microsoft Foundry.
@@ -26,10 +27,10 @@ Football coverage serves one audience at a time. MatchMind takes a stream of **s
 ## Microsoft / GitHub technologies
 | technology | how | status |
 |---|---|---|
-| **Microsoft Agent Framework** | `matchmind/agent_framework_adapter.py` exposes the match-state tools as Agent Framework function tools and builds an Azure OpenAI-backed agent. | Code + tests with an injected client; **live run pending Azure access** |
+| **Microsoft Agent Framework** | `matchmind/agent_framework_adapter.py` exposes the match-state tools as Agent Framework function tools and builds an Azure OpenAI-backed agent. | **Live**: run against Azure OpenAI gpt-4.1-mini with agent-framework 1.22 (tool calls answer correctly in EN/ES/IT), see [live/agent_framework_run.json](live/agent_framework_run.json) |
 | **MCP** | `matchmind/mcp_server.py`: a stdlib MCP server (JSON-RPC over stdio) with `get_score`, `get_momentum`, `get_key_moments`, `explain_moment`. | **Live**, tested via subprocess + CI smoke test |
-| **Microsoft Foundry / Azure OpenAI** | Narrator agent calls a Foundry deployment when env vars are set. Template fallback otherwise. | Code path ready; **not yet run live** (no Azure credits connected yet) |
-| **Azure Container Apps** | `Dockerfile` + `infra/deploy-containerapp.sh` (scale-to-zero). | Ready; **not deployed yet** |
+| **Microsoft Foundry / Azure OpenAI** | Narrator agent calls a Foundry/Azure OpenAI deployment (gpt-4.1-mini, Sweden Central) when env vars are set; template fallback on any error or rate limit. | **Live**: 17/18 EN/ES/IT test lines from the model, 1 graceful fallback ([live/foundry_narration.json](live/foundry_narration.json)); the Azure app streams `source: foundry` cues |
+| **Azure Container Apps** | `infra/deploy-containerapp.sh`: Consumption plan, 0.25 vCPU, min 0 / max 1 replica, registry-free (public python image fetches the repo at start); API key as a Container Apps secret. | **Live**: https://matchmind.yellowcoast-55678069.swedencentral.azurecontainerapps.io |
 | **GitHub Actions / Pages / CLI / Copilot-style agentic dev** | CI on Python 3.9 + 3.12 (unit tests + MCP smoke). Pages deploys the static replay. The repo is managed with `gh`. | **Live** |
 
 ## Agentic design (Best Multi-Agent System)
@@ -47,8 +48,8 @@ Broadcasters and streamers can produce one feed and serve many audiences and mar
 - Docs: [ARCHITECTURE](ARCHITECTURE.md), [DATA_CARD](../DATA_CARD.md), [VIDEO](VIDEO.md).
 
 ## Honest status (as of Oct 21, 2026)
-- **Works now, $0:** generator, full pipeline, EN/ES/IT, split UI, recap, MCP server, dataset export, CI, and the GitHub Pages replay.
-- **Pending Azure access:** live Foundry narration, a live Agent Framework run, and the Container Apps deploy. The Pages build is a static replay of template narration, not a live model.
+- **Live:** generator, full pipeline, EN/ES/IT, split UI, recap, MCP server, dataset export, CI, the GitHub Pages replay, Azure OpenAI narration, a live Agent Framework run, and the Azure Container Apps deploy (Azure free-trial credit).
+- **Caveats:** the Pages build is a static replay of template narration, not the live model. Model lines occasionally misread a player's first name as a team code; the facts in each line come from the event data. If the model is rate-limited, narration falls back to templates.
 - **Not done:** auto-eventing from video, ball/shot speed metrics, and pass difficulty rating (pass distance and accuracy exist).
 
 ## Testing instructions for judges

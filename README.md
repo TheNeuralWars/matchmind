@@ -14,6 +14,8 @@ events   MatchState   Explainer  Renderer   Personalizer (+ Narrator)
 - **Explainability metrics**: momentum (−1..1), control-vs-chaos index, xG, progressive passes, pass accuracy.
 - **Live demo UI** (`web/index.html`) via Server-Sent Events; same match, two genuinely different experiences (analyst vs casual fan).
 
+**▶ Live on Azure (Container Apps + Azure OpenAI narration):** https://matchmind.yellowcoast-55678069.swedencentral.azurecontainerapps.io/?autostart=1&view=split&seed=8&lang=en&lang2=it (scale-to-zero: first load ~20 s)
+
 **▶ Try it now (free static replay):** https://theneuralwars.github.io/matchmind/?autostart=1&view=split&seed=8&lang=en&lang2=it
 It shows precomputed replays of the real pipeline (template narration) and is rebuilt by GitHub Actions on every push via `python -m matchmind.static_export`. Submission text: [docs/SUBMISSION.md](docs/SUBMISSION.md).
 
@@ -67,7 +69,7 @@ from matchmind.agent_framework_adapter import build_agent
 agent = build_agent()   # AzureOpenAIChatClient from AZURE_OPENAI_ENDPOINT / _API_KEY / _DEPLOYMENT (or `az login`)
 print(asyncio.run(agent.run("Seed 7: who was on top after the hour, and why? Rispondi in italiano.")).text)
 ```
-You can also pass any Agent Framework chat client: `build_agent(chat_client=my_client)`. *Not yet tested live because it needs an Azure login.*
+You can also pass any Agent Framework chat client: `build_agent(chat_client=my_client)`. Tested live against Azure OpenAI with agent-framework 1.22: `python scripts/live_af_test.py` (results in `docs/live/`).
 
 ## Screenshots
 | | |
