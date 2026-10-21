@@ -3,7 +3,7 @@ from matchmind.generator import generate_match
 from matchmind.pipeline import Orchestrator, recap
 from matchmind.i18n import WHY, CASUAL, LANGS, render
 
-KINDS = ["goal", "big_chance", "shot", "speed_burst", "line_breaking_pass", "momentum_swing", "chaos_spike"]
+KINDS = ["goal", "big_chance", "shot", "speed_burst", "line_breaking_pass", "momentum_swing", "chaos_spike", "penalty_awarded", "red_card"]
 P = dict(name="Luca Ferro", team="NOR", opp="SOU", lead="NOR", momentum=0.42, chaos=0.55, xg=0.08, outcome="saved",
          pressure=True, team_xg=1.3, speed=34.1, dist=22.0, metres=31.0)
 

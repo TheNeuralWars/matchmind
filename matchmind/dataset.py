@@ -6,7 +6,7 @@ import argparse, csv, json, os, random, statistics
 from .generator import generate_match, FORMATIONS, GENERATOR_VERSION
 
 CSV_FIELDS = ["match_id", "seq", "t", "minute", "type", "team", "player", "x", "y", "end_x", "end_y",
-              "outcome", "xg", "pressure", "top_speed_kmh", "distance_m", "fatigue", "cause"]
+              "outcome", "xg", "pressure", "top_speed_kmh", "distance_m", "fatigue", "cause", "set_piece", "kind", "reason"]
 
 def random_style(seed, side):
     r = random.Random(f"style-{seed}-{side}")
@@ -24,7 +24,8 @@ def flat(match_id, e):
     m = e.get("meta", {})
     row = {k: e.get(k) for k in CSV_FIELDS}
     row.update(match_id=match_id, top_speed_kmh=m.get("top_speed_kmh"), distance_m=m.get("distance_m"),
-               fatigue=m.get("fatigue"), cause=m.get("cause"))
+               fatigue=m.get("fatigue"), cause=m.get("cause"),
+               set_piece=m.get("set_piece"), kind=m.get("kind"), reason=m.get("reason"))
     return row
 
 def export(out_dir, seeds, random_styles=False):

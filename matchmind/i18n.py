@@ -18,6 +18,8 @@ WHY = {
         "speed_burst": "{name} hits {speed} km/h over {dist} m, stretching {opp}'s line.",
         "line_breaking_pass": "{name} breaks lines with a {metres:.0f} m progressive pass, bypassing {opp}'s press.",
         "momentum_swing": "Momentum flips to {lead} ({momentum:+.2f}) — territory and duel wins over the last ~40 actions.",
+        "penalty_awarded": "Penalty to {team} after a foul on {name} in the box; spot kicks go in about 76% of the time.",
+        "red_card": "Red card for {name}: {team} are down to ten, and {opp} should now control the ball.",
         "chaos_spike": "Game turns chaotic (chaos index {chaos}): turnovers and pressured actions dominate; control is up for grabs.",
     },
     "es": {
@@ -28,6 +30,8 @@ WHY = {
         "speed_burst": "{name} se dispara hasta los {speed} km/h en {dist} m y estira la línea del {opp}.",
         "line_breaking_pass": "{name} rompe líneas con un pase progresivo de {metres:.0f} m y se salta la presión del {opp}.",
         "momentum_swing": "El dominio cambia de bando: ahora manda el {lead} ({momentum:+.2f}), por territorio y duelos ganados en las últimas ~40 acciones.",
+        "penalty_awarded": "Penalti para el {team} por falta sobre {name} en el área; desde los once metros se marca cerca del 76% de las veces.",
+        "red_card": "Roja para {name}: el {team} se queda con diez y el {opp} debería adueñarse del balón.",
         "chaos_spike": "El partido se rompe (índice de caos {chaos}): mandan las pérdidas y las acciones bajo presión; nadie controla.",
     },
     "it": {
@@ -38,6 +42,8 @@ WHY = {
         "speed_burst": "{name} tocca i {speed} km/h in {dist} m e allunga la linea del {opp}.",
         "line_breaking_pass": "{name} spacca le linee con un passaggio progressivo di {metres:.0f} m e salta il pressing del {opp}.",
         "momentum_swing": "L'inerzia cambia: ora comanda il {lead} ({momentum:+.2f}), tra territorio e duelli vinti nelle ultime ~40 azioni.",
+        "penalty_awarded": "Rigore per il {team} per un fallo su {name} in area; dal dischetto si segna circa il 76% delle volte.",
+        "red_card": "Rosso per {name}: il {team} resta in dieci e il {opp} dovrebbe prendere in mano il pallino del gioco.",
         "chaos_spike": "La partita si spezza (indice di caos {chaos}): palle perse e giocate sotto pressione, nessuno ha il controllo.",
     },
 }
@@ -51,6 +57,8 @@ CASUAL = {
         "speed_burst": "Rapid! {name} tears away from the {opp} defence.",
         "line_breaking_pass": "What a ball from {name}, right through {opp}!",
         "momentum_swing": "The tide is turning — {lead} are on top now!",
+        "penalty_awarded": "PENALTY to {team}! {name} is brought down in the box!",
+        "red_card": "Off he goes! {name} sees red and {team} are down to ten.",
         "chaos_spike": "It's getting wild out there!",
     },
     "es": {
@@ -60,6 +68,8 @@ CASUAL = {
         "speed_burst": "¡Qué velocidad! {name} deja atrás a la defensa del {opp}.",
         "line_breaking_pass": "¡Pasazo de {name}, filtrado entre las líneas del {opp}!",
         "momentum_swing": "¡El partido cambia de color: ahora aprieta el {lead}!",
+        "penalty_awarded": "¡PENALTI para el {team}! ¡Derriban a {name} dentro del área!",
+        "red_card": "¡A la calle! Roja para {name} y el {team} se queda con diez.",
         "chaos_spike": "¡Esto es un ida y vuelta, se ha vuelto loco!",
     },
     "it": {
@@ -69,6 +79,8 @@ CASUAL = {
         "speed_burst": "Che scatto! {name} brucia la difesa del {opp}.",
         "line_breaking_pass": "Che palla di {name}, dritta tra le linee del {opp}!",
         "momentum_swing": "Il vento sta cambiando: adesso spinge il {lead}!",
+        "penalty_awarded": "RIGORE per il {team}! {name} viene steso in area!",
+        "red_card": "Espulso! Rosso per {name}, il {team} resta in dieci.",
         "chaos_spike": "Partita impazzita, succede di tutto!",
     },
 }

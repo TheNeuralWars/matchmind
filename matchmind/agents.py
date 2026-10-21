@@ -18,6 +18,8 @@ class AnalystAgent:
         if k == "shot" and e["outcome"] == "goal": out.append(("goal", 1.0))
         elif k == "shot" and e["xg"] >= 0.25: out.append(("big_chance", 0.8))
         elif k == "shot": out.append(("shot", 0.4))
+        if k == "free_kick" and e["meta"].get("kind") == "penalty": out.append(("penalty_awarded", 0.9))
+        if k == "card" and e["outcome"] == "red": out.append(("red_card", 0.9))
         if k == "carry" and e["meta"]["top_speed_kmh"] >= self.SPEED_KMH: out.append(("speed_burst", 0.6))
         if k == "pass" and e["outcome"] == "success" and e["end_x"] - e["x"] >= 30: out.append(("line_breaking_pass", 0.5))
         if prev is not None and (prev["momentum"] > 0) != (st["momentum"] > 0) and abs(st["momentum"] - prev["momentum"]) >= 0.3: out.append(("momentum_swing", 0.7))

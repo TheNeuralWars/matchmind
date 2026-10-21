@@ -26,10 +26,14 @@ class MatchState:
             s["tackles"] += 1; s["tackles_won"] += e["outcome"] == "won"
         elif k == "possession_change":
             s["recoveries"] += 1
+        elif k == "corner": s["corners"] += 1
+        elif k == "foul": s["fouls"] += 1
+        elif k == "card": s["yellow" if e["outcome"] == "yellow" else "red"] += 1
         elif k == "carry":
             pl["distance_m"] += e["meta"]["distance_m"]; pl["top_speed_kmh"] = max(pl["top_speed_kmh"], e["meta"]["top_speed_kmh"])
         if k in ("pass", "carry", "shot"): s["touches"] += 1
-        self.window.append(e); self.last = e
+        if k not in ("card", "full_time"): self.window.append(e)
+        self.last = e
     def possession(self):
         a, b = self.stats[self.home]["touches"], self.stats[self.away]["touches"]
         return {self.home: round(100 * a / max(1, a + b)), self.away: round(100 * b / max(1, a + b))}
@@ -48,5 +52,6 @@ class MatchState:
     def snapshot(self):
         def team(t):
             s = self.stats[t]
-            return {"passes": int(s["passes"]), "pass_acc": round(100 * s["passes_ok"] / max(1, s["passes"])), "shots": int(s["shots"]), "xg": round(s["xg"], 2), "tackles_won": int(s["tackles_won"]), "progressive_passes": int(s["progressive"])}
+            return {"passes": int(s["passes"]), "pass_acc": round(100 * s["passes_ok"] / max(1, s["passes"])), "shots": int(s["shots"]), "xg": round(s["xg"], 2), "tackles_won": int(s["tackles_won"]), "progressive_passes": int(s["progressive"]),
+                    "corners": int(s["corners"]), "fouls": int(s["fouls"]), "yellow": int(s["yellow"]), "red": int(s["red"])}
         return {"minute": self.last["minute"] if self.last else 0, "score": dict(self.score), "possession": self.possession(), "momentum": self.momentum(), "chaos": self.chaos(), "teams": {t: team(t) for t in (self.home, self.away)}}
