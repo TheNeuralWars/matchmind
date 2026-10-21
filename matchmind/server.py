@@ -2,7 +2,7 @@
 import json, os, time
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
-from .generator import generate_match
+from .generator import generate_match, DEMO_SEED
 from .pipeline import Orchestrator, recap
 
 WEB = os.path.join(os.path.dirname(__file__), "..", "web", "index.html")
@@ -15,7 +15,7 @@ class H(BaseHTTPRequestHandler):
         if u.path == "/":
             with open(WEB, "rb") as f: return self._send(200, "text/html", f.read())
         if u.path == "/stream":
-            meta, events = generate_match(int(q.get("seed", 7)))
+            meta, events = generate_match(int(q.get("seed", DEMO_SEED)))
             prof = {"persona": q.get("persona", "casual"), "club": q.get("club") or None, "lang": q.get("lang", "en"), "player_id": q.get("player") or None}
             o = Orchestrator(meta, {"me": prof}); speed = float(q.get("speed", 60))
             self.send_response(200); self.send_header("Content-Type", "text/event-stream"); self.send_header("Cache-Control", "no-cache"); self.end_headers()

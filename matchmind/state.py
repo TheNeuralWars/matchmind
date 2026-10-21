@@ -32,7 +32,7 @@ class MatchState:
         elif k == "carry":
             pl["distance_m"] += e["meta"]["distance_m"]; pl["top_speed_kmh"] = max(pl["top_speed_kmh"], e["meta"]["top_speed_kmh"])
         if k in ("pass", "carry", "shot"): s["touches"] += 1
-        if k not in ("card", "full_time"): self.window.append(e)
+        if k not in ("card", "substitution", "full_time"): self.window.append(e)
         self.last = e
     def possession(self):
         a, b = self.stats[self.home]["touches"], self.stats[self.away]["touches"]

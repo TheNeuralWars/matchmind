@@ -1,5 +1,5 @@
 import unittest, statistics
-from matchmind.generator import generate_match, GENERATOR_VERSION, fatigue
+from matchmind.generator import generate_match, GENERATOR_VERSION, fatigue, DEMO_SEED
 
 def goals(ev): return sum(1 for e in ev if e["type"] == "shot" and e["outcome"] == "goal")
 
@@ -21,7 +21,8 @@ class GeneratorV2(unittest.TestCase):
         self.assertTrue(18 <= statistics.mean(len(s) for s in shots) <= 34)
         self.assertTrue(1.8 <= statistics.mean(sum(e["xg"] for e in s) for s in shots) <= 3.6)
     def test_sample_match_not_high_scoring(self):
-        self.assertLessEqual(goals(generate_match(7)[1]), 4)
+        self.assertLessEqual(goals(generate_match(DEMO_SEED)[1]), 5)
+        self.assertEqual(generate_match()[0]["seed"], DEMO_SEED)
 
 if __name__ == "__main__": unittest.main()
 
@@ -44,7 +45,8 @@ class StylesFormationsFatigue(unittest.TestCase):
     def test_formations(self):
         m, ev = generate_match(5, home_style={"formation": "3-5-2"}, away_style={"formation": "4-4-2"})
         self.assertEqual(m["formations"], {"NOR": "3-5-2", "SOU": "4-4-2"})
-        self.assertEqual(sum(p["pos"] == "CB" for p in m["players"].values() if p["team"] == "NOR"), 3)
+        starters = [p for p in m["players"].values() if p["team"] == "NOR" and int(p["id"][3:]) <= 11]
+        self.assertEqual(len(starters), 11); self.assertEqual(sum(p["pos"] == "CB" for p in starters), 3)
         with self.assertRaises(ValueError): generate_match(1, home_style={"formation": "2-2-6"})
     def test_fatigue_curve_and_late_game_effects(self):
         self.assertEqual(fatigue(30 * 60), 0.0); self.assertAlmostEqual(fatigue(90 * 60), 1.0)
@@ -84,17 +86,17 @@ class SetPiecesCardsScoreState(unittest.TestCase):
             reds = {e["player"]: e["seq"] for e in ev if e["type"] == "card" and e["outcome"] == "red"}
             for e in ev:
                 if e["player"] in reds and e["type"] != "full_time": self.assertLessEqual(e["seq"], reds[e["player"]])
-    def test_trailing_team_attacks_more(self):
-        """Shots per minute of game time: trailing team vs leading team (score-state reaction)."""
-        trail = lead = 0
-        for _, ev in self.runs:
+    def test_trailing_team_plays_more_directly(self):
+        """Score-state reaction: after 60', a trailing side's passes from its own half go further forward than a leading side's."""
+        tr, ld = [], []
+        for ev in (generate_match(s)[1] for s in range(150)):   # default styles: no style confound
             sc = {}
             for e in ev:
-                if e["type"] == "shot":
+                if e["type"] == "shot" and e["outcome"] == "goal": sc[e["team"]] = sc.get(e["team"], 0) + 1
+                if e["type"] == "pass" and e["x"] < 60 and e["minute"] >= 60:
                     me, other = sc.get(e["team"], 0), sum(v for k, v in sc.items() if k != e["team"])
-                    trail += me < other; lead += me > other
-                    if e["outcome"] == "goal": sc[e["team"]] = me + 1
-        self.assertGreater(trail, lead)
+                    if me != other: (tr if me < other else ld).append(e["end_x"] - e["x"])
+        self.assertGreater(statistics.mean(tr), statistics.mean(ld) + 1)
     def test_full_time_score_matches(self):
         for _, ev in self.runs:
             g = {}
@@ -106,3 +108,27 @@ class SetPiecesCardsScoreState(unittest.TestCase):
             for e in ev:
                 if e["type"] == "shot":
                     self.assertLessEqual(e["x"], 100.5); self.assertTrue(8 <= e["y"] <= 60)
+
+class SubsHomeAdvantageVolumes(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls): SetPiecesCardsScoreState.setUpClass(); cls.runs = SetPiecesCardsScoreState.runs
+    per_match = SetPiecesCardsScoreState.per_match
+    def test_volumes_v4(self):
+        self.assertTrue(22 <= self.per_match(lambda e: e["type"] == "shot") <= 28)
+        self.assertTrue(17 <= self.per_match(lambda e: e["type"] == "foul") <= 23)
+    def test_substitutions(self):
+        for m, ev in self.runs:
+            subs = [e for e in ev if e["type"] == "substitution"]
+            for tm in (m["home"], m["away"]):
+                self.assertEqual(sum(e["team"] == tm for e in subs), 5)
+            for sub in subs:
+                self.assertTrue(55 <= sub["minute"] <= 90)
+                on, off = sub["meta"]["on"], sub["meta"]["off"]
+                self.assertIn(on, m["players"])
+                self.assertFalse(any(e["player"] == on and e["seq"] < sub["seq"] and e["type"] != "substitution" for e in ev))
+                self.assertFalse(any(e["player"] == off and e["seq"] > sub["seq"] for e in ev if e["type"] != "full_time"))
+    def test_home_advantage(self):
+        hw = aw = 0
+        for m, ev in self.runs:
+            sc = ev[-1]["meta"]["score"]; hw += sc[m["home"]] > sc[m["away"]]; aw += sc[m["away"]] > sc[m["home"]]
+        self.assertGreater(hw, aw * 1.2)

@@ -1,12 +1,12 @@
 import argparse, json
-from .generator import generate_match
+from .generator import generate_match, DEMO_SEED
 from .pipeline import Orchestrator, recap
 
 DEFAULT_PROFILES = {"analyst": {"persona": "analyst", "lang": "en"}, "casual_fan": {"persona": "casual", "club": "NOR", "lang": "en"}}
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="MatchMind synthetic match insights")
-    ap.add_argument("--seed", type=int, default=7); ap.add_argument("--profile", default="casual_fan")
+    ap.add_argument("--seed", type=int, default=DEMO_SEED); ap.add_argument("--profile", default="casual_fan")
     ap.add_argument("--dump-events", help="write synthetic events JSONL here")
     a = ap.parse_args(argv)
     meta, events = generate_match(a.seed)
