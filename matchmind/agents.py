@@ -1,5 +1,6 @@
 """Specialised agents sharing MatchState. Each agent has one role; the Orchestrator hands off between them."""
 from .llm import chat
+from .i18n import render, norm
 
 class AnalystAgent:
     """Detects key moments (with thresholds) from the event + state."""
@@ -24,40 +25,31 @@ class AnalystAgent:
         return out
 
 class ExplainerAgent:
-    """Turns a moment into WHY it matters, with evidence fields judges/analysts can audit."""
-    def explain(self, kind, e, st, meta):
+    """Turns a moment into WHY it matters, with evidence fields judges/analysts can audit.
+    Keeps language-neutral params so Narrator can render natively in EN/ES/IT."""
+    def explain(self, kind, e, st, meta, lang="en"):
         name = meta["players"][e["player"]]["name"]; tm = e["team"]; opp = meta["away"] if tm == meta["home"] else meta["home"]
         ev = {"minute": e["minute"], "team": tm, "player": name, "momentum": st["momentum"], "chaos": st["chaos"]}
-        if kind == "goal":
-            why = f"{name} converts a {e['xg']:.2f} xG chance" + (" — well above expectation" if e["xg"] < 0.15 else "") + f"; {tm} total xG now {st['teams'][tm]['xg']}."
-        elif kind == "big_chance":
-            why = f"{name} had a {e['xg']:.2f} xG look ({e['outcome']}). {tm} are creating quality, not just volume."
-        elif kind == "shot":
-            why = f"Low-value attempt ({e['xg']:.2f} xG) from {name}; pressure={'yes' if e.get('pressure') else 'no'}."
+        p = {"name": name, "team": tm, "opp": opp, "momentum": st["momentum"], "chaos": st["chaos"],
+             "lead": meta["home"] if st["momentum"] > 0 else meta["away"]}
+        if kind in ("goal", "big_chance", "shot"):
+            p.update(xg=e["xg"], outcome=e["outcome"], pressure=bool(e.get("pressure")), team_xg=st["teams"][tm]["xg"])
         elif kind == "speed_burst":
-            why = f"{name} hits {e['meta']['top_speed_kmh']} km/h over {e['meta']['distance_m']} m, stretching {opp}'s line."
+            p.update(speed=e["meta"]["top_speed_kmh"], dist=e["meta"]["distance_m"])
         elif kind == "line_breaking_pass":
-            why = f"{name} breaks lines with a {e['end_x'] - e['x']:.0f} m progressive pass, bypassing {opp}'s press."
-        elif kind == "momentum_swing":
-            lead = meta["home"] if st["momentum"] > 0 else meta["away"]
-            why = f"Momentum flips to {lead} ({st['momentum']:+.2f}) — territory and duel wins over the last ~40 actions."
-        else:
-            why = f"Game turns chaotic (chaos index {st['chaos']}): turnovers and pressured actions dominate; control is up for grabs."
-        return {"kind": kind, "why": why, "evidence": ev}
+            p.update(metres=e["end_x"] - e["x"])
+        return {"kind": kind, "why": render(kind, p, lang), "params": p, "evidence": ev}
 
-TEMPL = {
-    "en": "{why}", "es": "[ES] {why}", "it": "[IT] {why}",
-}
 class NarratorAgent:
-    """Writes commentary lines; uses Azure AI Foundry model when configured, else deterministic template."""
+    """Writes commentary lines; uses Azure AI Foundry model when configured, else native EN/ES/IT templates."""
+    LANG_NAME = {"en": "English", "es": "Spanish (natural Spanish football commentary)", "it": "Italian (natural Italian telecronaca)"}
     def narrate(self, insight, persona, lang="en"):
+        lang = norm(lang)
         style = "data-rich, precise, cite numbers" if persona == "analyst" else "short, warm, exciting, no jargon"
-        txt = chat(f"You are a football match narrator. Style: {style}. Language: {lang}. One sentence, max 30 words. Only use facts provided.", insight["why"])
+        txt = chat(f"You are a football match narrator. Style: {style}. Language: {self.LANG_NAME[lang]}. One sentence, max 30 words. Only use facts provided.", insight["why"])
         if txt: return txt, "foundry"
-        base = insight["why"]
-        if persona == "casual":
-            base = {"goal": "GOAL! ", "big_chance": "So close! ", "speed_burst": "Rapid! ", "momentum_swing": "The tide is turning! ", "chaos_spike": "It's getting wild! "}.get(insight["kind"], "") + base.split(";")[0].split(" — ")[0]
-        return TEMPL.get(lang, "{why}").format(why=base), "template"
+        if "params" not in insight: return insight["why"], "template"
+        return render(insight["kind"], insight["params"], lang, "casual" if persona == "casual" else "analyst"), "template"
 
 class PersonalizerAgent:
     """Filters/re-ranks insights per fan profile: persona, favourite club, focus player, language."""
@@ -76,4 +68,4 @@ class RendererAgent:
     def overlay(self, e, insight, text, st, profile):
         return {"t": e["t"], "minute": e["minute"], "duration_s": 6 if insight["kind"] in ("goal", "momentum_swing") else 4,
                 "template": f"lower_third.{insight['kind']}", "anchor": "bottom_left", "text": text,
-                "data": {"score": st["score"], "momentum": st["momentum"], "possession": st["possession"]}, "lang": profile.get("lang", "en")}
+                "data": {"score": st["score"], "momentum": st["momentum"], "possession": st["possession"]}, "lang": norm(profile.get("lang", "en"))}

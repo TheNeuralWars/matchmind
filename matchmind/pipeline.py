@@ -1,5 +1,6 @@
 """Orchestrator: Ingest -> Interpret -> Explain -> Render -> Personalize, with agent handoffs and failure recovery."""
 from .state import MatchState
+from .i18n import norm
 from .agents import AnalystAgent, ExplainerAgent, NarratorAgent, PersonalizerAgent, RendererAgent
 
 class Orchestrator:
@@ -28,9 +29,15 @@ class Orchestrator:
         self.prev = st
         return st, out
 
-def recap(orch):
+RECAP = {
+    "en": "Full time: {h} {hs}-{as_} {a}. xG {hx}-{ax}, possession {hp}%-{ap}%. Standout: {star}.",
+    "es": "Final del partido: {h} {hs}-{as_} {a}. xG {hx}-{ax}, posesión {hp}%-{ap}%. El mejor: {star}.",
+    "it": "Triplice fischio: {h} {hs}-{as_} {a}. xG {hx}-{ax}, possesso {hp}%-{ap}%. Migliore in campo: {star}.",
+}
+
+def recap(orch, lang="en"):
     st = orch.state.snapshot(); h, a = orch.meta["home"], orch.meta["away"]
     top = max(orch.state.player.items(), key=lambda kv: kv[1]["xg"] + 2 * kv[1]["goals"], default=(None, {}))
     star = orch.meta["players"][top[0]]["name"] if top[0] else "n/a"
-    return (f"Full time: {h} {st['score'][h]}-{st['score'][a]} {a}. xG {st['teams'][h]['xg']}-{st['teams'][a]['xg']}, "
-            f"possession {st['possession'][h]}%-{st['possession'][a]}%. Standout: {star}.")
+    return RECAP[norm(lang)].format(h=h, a=a, hs=st["score"][h], as_=st["score"][a], hx=st["teams"][h]["xg"], ax=st["teams"][a]["xg"],
+                                    hp=st["possession"][h], ap=st["possession"][a], star=star)
