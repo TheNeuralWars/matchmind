@@ -5,6 +5,12 @@ Upload to YouTube unlisted, then make it public before submitting.
 **Rules:** no copyrighted music (use silence or a CC0/self-made track), and no Premier League marks, crests or footage. Everything shown is synthetic.
 Follows the *Demo script* in [PLAN.md](../PLAN.md).
 
+## Draft v1 (Oct 21)
+`media/matchmind_demo_v1.mp4` runs 1:44, 1920×1080, H.264/AAC, 6.8 MB. It has no music and only synthetic content. `python3 scripts/assemble_video.py` rebuilds it from:
+- **Clips:** `scripts/record_demo.sh 60` (1080p, no cursor, full match in ~55 s at speed 98, so the penalty at 65' is around 40 s in each clip).
+- **VO:** `media/vo/s1..s7.wav`, made with local **Piper TTS** (`en_GB-alan-medium`, free/offline) from `media/vo/script.json`, a tightened version of the narration below. The ElevenLabs attempt was rate-limited (429) twice. Nothing was generated or charged; the flow is ready to re-run in the ElevenLabs UI with the "Daniel – Steady Broadcaster" premade voice, ~1,341 credits.
+- **Cards:** ffmpeg drawtext. Stills come from `docs/`.
+
 ## Assets
 | file | what | how to (re)make |
 |---|---|---|
