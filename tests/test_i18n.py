@@ -43,3 +43,25 @@ class I18n(unittest.TestCase):
         self.assertIn("Final del partido", recap(o, "es")); self.assertIn("Triplice fischio", recap(o, "it"))
 
 if __name__ == "__main__": unittest.main()
+
+class Fallback(unittest.TestCase):
+    def _run(self, lang, broken_params=False):
+        meta, ev = generate_match(7); o = Orchestrator(meta, {"me": {"persona": "analyst", "lang": lang}})
+        def boom(*a, **k): raise RuntimeError("narrator down")
+        o.narrator.narrate = boom
+        if broken_params:
+            real = o.explainer.explain
+            o.explainer.explain = lambda *a, **k: {**real(*a, **k), "params": {}}
+        cues = []
+        for e in ev: cues += o.step(e)[1]["me"]
+        return cues
+    def test_fallback_is_localised(self):
+        es, it = self._run("es"), self._run("it")
+        self.assertTrue(es and all(c["source"] == "fallback:RuntimeError" for c in es))
+        self.assertEqual([c["text"] for c in es], [c["text"] for c in self._run("es")])
+        self.assertNotEqual(es[0]["text"], it[0]["text"])
+        self.assertTrue(any("ocasión" in c["text"] or "Disparo" in c["text"] for c in es))
+    def test_generic_fallback_when_params_broken(self):
+        it = self._run("it", broken_params=True)
+        self.assertTrue(it and all("momento chiave" in c["text"] for c in it))
+        self.assertTrue(all("Min." in c["text"] for c in self._run("es", broken_params=True)))

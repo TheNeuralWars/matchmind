@@ -27,7 +27,7 @@ class H(BaseHTTPRequestHandler):
                     st, out = o.step(e)
                     self._sse("state", st)
                     for cue in out["me"]: self._sse("cue", cue)
-                self._sse("recap", {"text": recap(o)})
+                self._sse("recap", {"text": recap(o, prof["lang"])})
             except (BrokenPipeError, ConnectionResetError):
                 pass
             return

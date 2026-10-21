@@ -85,3 +85,19 @@ def render(kind, params, lang="en", persona="analyst"):
     if kind == "goal" and persona != "casual":
         p["surprise"] = WHY[lang]["goal_surprise"] if p.get("xg", 1) < 0.15 else ""
     return table[lang][kind].format(**p)
+
+# Last-resort line when even template rendering fails (e.g. missing params). {minute} and {team} only.
+GENERIC = {
+    "en": "{minute}' — key moment for {team}.",
+    "es": "Min. {minute} — momento clave para el {team}.",
+    "it": "{minute}' — momento chiave per il {team}.",
+}
+
+def fallback(insight, lang="en", persona="analyst"):
+    """Localised text used when the Narrator agent fails. Never raises."""
+    lang = norm(lang)
+    try:
+        return render(insight["kind"], insight["params"], lang, "casual" if persona == "casual" else "analyst")
+    except Exception:
+        ev = insight.get("evidence", {})
+        return GENERIC[lang].format(minute=ev.get("minute", "?"), team=ev.get("team", "?"))

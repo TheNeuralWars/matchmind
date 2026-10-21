@@ -1,6 +1,6 @@
 """Orchestrator: Ingest -> Interpret -> Explain -> Render -> Personalize, with agent handoffs and failure recovery."""
 from .state import MatchState
-from .i18n import norm
+from .i18n import norm, fallback
 from .agents import AnalystAgent, ExplainerAgent, NarratorAgent, PersonalizerAgent, RendererAgent
 
 class Orchestrator:
@@ -21,8 +21,8 @@ class Orchestrator:
                 if sc < self.personalizer.threshold(prof): continue
                 try:
                     text, src = self.narrator.narrate(ins, prof.get("persona", "casual"), prof.get("lang", "en"))
-                except Exception as ex:                              # recovery: fall back to raw explanation
-                    text, src = ins["why"], f"fallback:{type(ex).__name__}"
+                except Exception as ex:                              # recovery: localised template, no model
+                    text, src = fallback(ins, prof.get("lang", "en"), prof.get("persona", "casual")), f"fallback:{type(ex).__name__}"
                 cue = self.renderer.overlay(e, ins, text, st, prof)  # render
                 cue.update(score_rank=sc, source=src, evidence=ins["evidence"])
                 out[pid].append(cue)
