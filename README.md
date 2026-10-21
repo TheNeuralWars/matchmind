@@ -18,13 +18,15 @@ events   MatchState   Explainer  Renderer   Personalizer (+ Narrator)
 Requires only **Python 3.9+**. There are no dependencies and no API keys, and everything runs offline at $0.
 ```bash
 git clone https://github.com/TheNeuralWars/matchmind && cd matchmind
-python -m unittest -v                                   # 27 tests, stdlib only
+python -m unittest -v                                   # full suite, stdlib only
 python -m matchmind.cli --seed 7 --profile analyst      # narrated match in the terminal
 python -m matchmind.server                              # open http://localhost:8000 (pick persona / club / en·es·it)
+#   deep link: http://localhost:8000/?autostart=1&seed=12&persona=casual&club=NOR&lang=it&speed=600
+python -m matchmind.mcp_server                          # MCP server over stdio (see below)
 python -m matchmind.dataset --out data/ --seeds 0-199 --random-styles   # synthetic dataset (CSV + JSONL)
 ```
 Stream endpoint directly: `curl -N "localhost:8000/stream?seed=7&persona=casual&club=NOR&lang=es&speed=600"`
-(SSE events: `meta`, `state`, `cue`, `recap`).
+(SSE events: `meta`, `state`, `shot`, `cue`, `recap`). The UI draws a live SVG shot map, sized by xG with goals filled, and a per-minute momentum chart. It is plain JS with no build step.
 
 ### Generator knobs
 ```python
@@ -34,7 +36,7 @@ meta, events = generate_match(seed=7,
     away_style={"possession": 0.3, "directness": 0.9, "formation": "3-5-2"})
 ```
 Styles run 0..1. The formations are `4-3-3`, `4-4-2`, `4-2-3-1` and `3-5-2`. Fatigue builds from 60' and makes the late game sloppier and more open.
-Calibrated to ~2.6–2.8 goals per match, with ~90% of matches ending 0–4 goals. See **[DATA_CARD.md](DATA_CARD.md)** for exactly what is (and isn't) realistic.
+Set pieces are included: corners, free kicks and penalties, plus yellow and red cards (a sent-off player leaves the pitch). Trailing teams push forward. Calibrated to ~2.6 goals per match, with ~90% of matches ending 0–4 goals. See **[DATA_CARD.md](DATA_CARD.md)** for exactly what is (and isn't) realistic.
 
 ### Languages
 English, Spanish and Italian have hand-written native templates (`matchmind/i18n.py`) in an analyst register and a casual-fan register.
@@ -42,18 +44,43 @@ If Azure AI Foundry is configured it writes the lines; if it fails, the output f
 
 Optional Azure AI Foundry narration: set `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_DEPLOYMENT`.
 
-## Screenshots (to capture)
-- [ ] `docs/ui-casual-en.png` — overlay UI, casual fan, NOR, English
-- [ ] `docs/ui-analyst-es.png` — same match, analyst, Spanish (split-screen hook)
-- [ ] `docs/ui-casual-it.png` — Italian lower-thirds during a goal
+## MCP server (match-state tools)
+`matchmind/mcp_server.py` is a dependency-free MCP server that speaks JSON-RPC 2.0, newline-delimited over stdio. Its tools:
+`get_score`, `get_momentum`, `get_key_moments` and `explain_moment` (en/es/it, analyst or casual). Each takes a `seed` and, optionally, a `minute`.
+```json
+{"mcpServers": {"matchmind": {"command": "python", "args": ["-m", "matchmind.mcp_server"], "cwd": "/path/to/matchmind"}}}
+```
+Smoke test: `printf '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_score","arguments":{"seed":7,"minute":45}}}\n' | python -m matchmind.mcp_server`
+
+## Microsoft Agent Framework (optional)
+`matchmind/agent_framework_adapter.py` wraps the same tools (`matchmind/tools.py`) as Agent Framework function tools.
+The import is guarded, so MatchMind runs and tests without it.
+```bash
+pip install agent-framework azure-identity   # optional
+```
+```python
+import asyncio
+from matchmind.agent_framework_adapter import build_agent
+agent = build_agent()   # AzureOpenAIChatClient from AZURE_OPENAI_ENDPOINT / _API_KEY / _DEPLOYMENT (or `az login`)
+print(asyncio.run(agent.run("Seed 7: who was on top after the hour, and why? Rispondi in italiano.")).text)
+```
+You can also pass any Agent Framework chat client: `build_agent(chat_client=my_client)`. *Not yet tested live because it needs an Azure login.*
+
+## Screenshots
+- [x] `docs/ui-analyst-es.png` — analyst, Spanish: shot map + momentum chart + cues
+- [x] `docs/ui-casual-it.png` — casual fan, Italian, with a red card and goals
+- [ ] `docs/ui-casual-en.png` — split-screen hook, analyst vs casual on the same match
 - [ ] `docs/cue-json.png` — raw overlay cue JSON next to the rendered lower-third
 - [ ] `docs/cli.png` — CLI narrated run + recap
-- [ ] `docs/architecture.png` — Ingest → Interpret → Explain → Render → Personalize diagram
+- [ ] `docs/architecture.png` — Ingest → Interpret → Explain → Render → Personalize (+ MCP / Agent Framework) diagram
+
+![analyst-es](docs/ui-analyst-es.png)
 
 ## Azure
 - **Azure Container Apps** (scale-to-zero, Consumption free grant) — `infra/deploy-containerapp.sh`, `Dockerfile`
 - **Microsoft Foundry / Azure OpenAI** — narrator + multilingual output (`matchmind/llm.py`)
-- Roadmap: Azure Functions event ingestion, Cosmos DB free tier for match state, Microsoft Agent Framework orchestration.
+- **Microsoft Agent Framework** adapter + **MCP** match-state server (see above)
+- Roadmap: Azure Functions event ingestion, Cosmos DB free tier for match state.
 
 ## Overlay cue format
 ```json
