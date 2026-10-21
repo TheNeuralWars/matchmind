@@ -26,3 +26,8 @@ AI scout + match narrator. Five-stage pipeline the rules ask for, verbatim: Inge
 - **Sun 25:** recap generator (post-match article + social clip text); eval tests; README diagrams.
 - **Mon 26:** record video, upload YouTube (unlisted→public), write pitch.
 - **Tue 27:** buffer, final fixes, **submit by 20:00 Rome** (well before 08:59 Oct 28).
+
+## Progress
+- **Wed 21 (done):** Generator v2 calibration (`GENERATOR_VERSION=2`): ~27 shots, ~2.6 xG, ~2.7 goals/match over 500 seeds; ~80% of matches 0–4 goals; seed 7 now 0-1 (was 5-3). Deterministic per seed. ✅
+- **Wed 21 (done):** Native ES/IT offline templates (`matchmind/i18n.py`) for Explainer, Narrator (analyst + casual registers) and recap; Foundry prompt asks for natural Spanish/Italian commentary. 15 stdlib tests pass. ✅
+- **Next:** formations/fatigue/team style params, JSONL dataset export + data card, UI language switch check, Foundry narrator live.
