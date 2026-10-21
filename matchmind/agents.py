@@ -5,7 +5,7 @@ from .i18n import render, norm
 class AnalystAgent:
     """Detects key moments (with thresholds) from the event + state."""
     SPEED_KMH = 33.0
-    COOLDOWN_S = {"momentum_swing": 300, "chaos_spike": 420, "speed_burst": 180}
+    COOLDOWN_S = {"momentum_swing": 300, "chaos_spike": 420, "speed_burst": 480}
     def __init__(self): self._last = {}
     def _ok(self, kind, t):
         if t - self._last.get(kind, -1e9) < self.COOLDOWN_S.get(kind, 0): return False
