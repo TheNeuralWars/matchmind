@@ -1,0 +1,26 @@
+flowchart TB
+  subgraph GEN["Synthetic data engine (generator v4, seeded)"]
+    G["generate_match(seed, styles)<br/>passes · carries · duels · fouls<br/>corners · free kicks · penalties<br/>cards · subs · fatigue · home edge"]
+  end
+  subgraph PIPE["Orchestrator: 5-stage multi-agent pipeline"]
+    I["1 Ingest<br/>event stream"] --> S["2 Interpret<br/>MatchState: score, xG, possession,<br/>momentum, control-vs-chaos"]
+    S --> AN["Analyst agent<br/>key moments, thresholds, cooldowns"]
+    AN --> EX["3 Explain<br/>Explainer agent: WHY + evidence"]
+    EX --> PE["5 Personalize<br/>Personalizer: persona · club · player · lang"]
+    PE --> NA["Narrator agent<br/>Foundry model or EN/ES/IT templates"]
+    NA --> RE["4 Render<br/>Renderer: timed overlay cue JSON"]
+    NA -. "agent failure" .-> FB["Localised fallback"]
+    FB --> RE
+  end
+  G --> I
+  RE --> SSE["SSE /stream"] --> UI["Web UI<br/>split view · shot map · momentum chart"]
+  S --> RC["Recap + social post<br/>EN/ES/IT"] --> UI
+  subgraph SURF["Agent surfaces"]
+    T["tools.py<br/>get_score · get_momentum<br/>get_key_moments · explain_moment"]
+    T --> MCP["MCP server<br/>JSON-RPC over stdio"]
+    T --> AF["Microsoft Agent Framework adapter<br/>(optional)"]
+  end
+  G --> T
+  NA <-. "optional" .-> FD["Azure AI Foundry / Azure OpenAI"]
+  AF <-. "optional" .-> FD
+  G --> DS["Dataset export<br/>CSV · JSONL · DATA_CARD"]

@@ -19,19 +19,19 @@ Requires only **Python 3.9+**. There are no dependencies and no API keys, and ev
 ```bash
 git clone https://github.com/TheNeuralWars/matchmind && cd matchmind
 python -m unittest -v                                   # full suite, stdlib only
-python -m matchmind.cli --seed 7 --profile analyst      # narrated match in the terminal
+python -m matchmind.cli --profile analyst --lang es     # narrated demo match (seed 8) + recap + social post
 python -m matchmind.server                              # open http://localhost:8000 (pick persona / club / en·es·it)
-#   deep link: http://localhost:8000/?autostart=1&seed=12&persona=casual&club=NOR&lang=it&speed=600
+#   split screen: http://localhost:8000/?autostart=1&view=split&seed=8&lang=en&lang2=it&speed=600
 python -m matchmind.mcp_server                          # MCP server over stdio (see below)
 python -m matchmind.dataset --out data/ --seeds 0-199 --random-styles   # synthetic dataset (CSV + JSONL)
 ```
-Stream endpoint directly: `curl -N "localhost:8000/stream?seed=7&persona=casual&club=NOR&lang=es&speed=600"`
+Stream endpoint directly: `curl -N "localhost:8000/stream?seed=8&persona=casual&club=NOR&lang=es&speed=600"`
 (SSE events: `meta`, `state`, `shot`, `cue`, `recap`). The UI draws a live SVG shot map, sized by xG with goals filled, and a per-minute momentum chart. It is plain JS with no build step.
 
 ### Generator knobs
 ```python
 from matchmind.generator import generate_match
-meta, events = generate_match(seed=7,
+meta, events = generate_match(seed=8,
     home_style={"possession": 0.8, "pressing": 0.7, "directness": 0.3, "formation": "4-3-3"},
     away_style={"possession": 0.3, "directness": 0.9, "formation": "3-5-2"})
 ```
@@ -67,14 +67,13 @@ print(asyncio.run(agent.run("Seed 7: who was on top after the hour, and why? Ris
 You can also pass any Agent Framework chat client: `build_agent(chat_client=my_client)`. *Not yet tested live because it needs an Azure login.*
 
 ## Screenshots
-- [x] `docs/ui-analyst-es.png` — analyst, Spanish: shot map + momentum chart + cues
-- [x] `docs/ui-casual-it.png` — casual fan, Italian, with a red card and goals
-- [ ] `docs/ui-casual-en.png` — split-screen hook, analyst vs casual on the same match
-- [ ] `docs/cue-json.png` — raw overlay cue JSON next to the rendered lower-third
-- [ ] `docs/cli.png` — CLI narrated run + recap
-- [ ] `docs/architecture.png` — Ingest → Interpret → Explain → Render → Personalize (+ MCP / Agent Framework) diagram
+| | |
+|---|---|
+| ![split](docs/ui-split-en-it.png) **Split view**: same match, analyst (EN) vs casual fan (IT) | ![architecture](docs/architecture.png) **Architecture**: see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| ![analyst-es](docs/ui-analyst-es.png) Analyst, Spanish: shot map, momentum, cues, recap | ![casual-it](docs/ui-casual-it.png) Casual fan, Italian: red card + goals |
+| ![cue](docs/cue-json.png) Overlay cue JSON → rendered lower-third | ![cli](docs/cli.png) CLI narrated run + post-match article |
 
-![analyst-es](docs/ui-analyst-es.png)
+Regenerate the UI screenshots with headless Chrome via the deep link, e.g. `/?autostart=1&view=split&seed=8&lang=en&lang2=it&speed=100000`.
 
 ## Azure
 - **Azure Container Apps** (scale-to-zero, Consumption free grant) — `infra/deploy-containerapp.sh`, `Dockerfile`
