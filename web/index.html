@@ -72,6 +72,6 @@ function go(){reset();const split=view.value==='split';document.body.classList.t
 if(window.MATCHMIND_STATIC){staticnote.style.display='block';seedlist.textContent=window.MATCHMIND_STATIC.seeds.join(', ')}
 view.onchange=()=>document.body.classList.toggle('split',view.value==='split');
 // Deep link for demos/screenshots: /?autostart=1&view=split&seed=8&lang=en&lang2=it&speed=600
-{const u=new URLSearchParams(location.search);for(const k of['seed','view','persona','club','lang','lang2','speed'])if(u.has(k))document.getElementById(k).value=u.get(k);
+{const u=new URLSearchParams(location.search);if(u.has('zoom'))document.body.style.zoom=u.get('zoom');for(const k of['seed','view','persona','club','lang','lang2','speed'])if(u.has(k))document.getElementById(k).value=u.get(k);
  document.body.classList.toggle('split',view.value==='split');if(u.has('autostart'))go();}
 </script></body></html>
