@@ -4,6 +4,7 @@ from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 from .generator import generate_match, DEMO_SEED
 from .pipeline import Orchestrator, recap
+from .recap import post_match
 
 WEB = os.path.join(os.path.dirname(__file__), "..", "web", "index.html")
 
@@ -29,7 +30,8 @@ class H(BaseHTTPRequestHandler):
                     if e["type"] == "shot":
                         self._sse("shot", {k: e.get(k) for k in ("t", "minute", "team", "player", "x", "y", "xg", "outcome")} | {"set_piece": e["meta"].get("set_piece")})
                     for cue in out["me"]: self._sse("cue", cue)
-                self._sse("recap", {"text": recap(o, prof["lang"])})
+                pm = post_match(meta, events, prof["lang"])
+                self._sse("recap", {"text": recap(o, prof["lang"]), "article": pm["article"], "social": pm["social"]})
             except (BrokenPipeError, ConnectionResetError):
                 pass
             return
