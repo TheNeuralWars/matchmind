@@ -1,0 +1,24 @@
+{
+ "agent_framework": "1.22.0",
+ "deployment": "mm-mini",
+ "rows": [
+  {
+   "lang": "en",
+   "question": "Seed 8: what was the score at minute 70 and who had momentum? Then explain the most important moment.",
+   "seconds": 6.8,
+   "answer": "At minute 70, the score was 2-0 in favor of the home team (NOR). The momentum was slightly in favor of NOR with a momentum value of 0.12, indicating NOR had a mild upper hand in the match around that time.\n\nThe most important moment identified comes later at minute 85 when Gus Lorne scored a goal for the away team (SOU). This moment matters because Lorne converted a chance with an expected goal value of 0.15 xG, which boosted SOU's total xG in the game to 1.9, indicating a significant offensive impact. This goal likely shifted momentum heavily towards SOU, influencing the game's dynamic substantially."
+  },
+  {
+   "lang": "es",
+   "question": "Semilla 8: ¿cómo terminó el partido y cuál fue el momento clave? Responde en español.",
+   "seconds": 3.0,
+   "answer": "El partido terminó con un resultado de 2-3 a favor del equipo visitante SOU. \n\nEl momento clave fue un pase rompelineas realizado por Aren Marlow del equipo SOU en el minuto 89. Este pase progresivo de 31 metros fue decisivo porque superó la presión del equipo local NOR, permitiendo a SOU mantener el impulso y controlar el final del partido. Este tipo de jugada es importante porque puede cambiar el ritmo del juego y asegurar el dominio en esos minutos finales."
+  },
+  {
+   "lang": "it",
+   "question": "Seed 8: chi era in vantaggio al minuto 60? Spiega perché, in italiano.",
+   "seconds": 4.0,
+   "answer": "Al minuto 60, la squadra in vantaggio era il NOR con il punteggio di 1-0. Questo vantaggio è confermato anche dall'indice di momento del match, che mostra un valore leggermente positivo (0.09) a favore della squadra di casa NOR, indicando che negli ultimi minuti ha avuto un leggero predominio nel controllo del gioco. \n\nIl vantaggio è importante perché, sebbene il punteggio sia solo di un gol, il controllo del gioco aiuta NOR a gestire il ritmo e cercare di mantenere la posizione, riducendo le occasioni offensive per l'avversario SOU. Tuttavia, l'indice di caos è piuttosto elevato (0.53), suggerendo che la partita è stata piuttosto frammentata e intensa, con molte azioni rapidamente alternate, il che potrebbe rendere il vantaggio di NOR meno stabile."
+  }
+ ]
+}

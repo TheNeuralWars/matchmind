@@ -1,0 +1,153 @@
+{
+ "deployment": "mm-mini",
+ "model": "gpt-4.1-mini (2025-04-14)",
+ "region": "swedencentral",
+ "foundry_lines": 17,
+ "total": 18,
+ "rows": [
+  {
+   "moment": "SYN-8-516-goal",
+   "lang": "en",
+   "persona": "analyst",
+   "source": "foundry",
+   "ms": 1498,
+   "text": "Dario Wren's 0.15 xG goal propels NOR's total xG to 0.45, indicating efficient finishing beyond expected metrics."
+  },
+  {
+   "moment": "SYN-8-516-goal",
+   "lang": "en",
+   "persona": "casual",
+   "source": "foundry",
+   "ms": 1486,
+   "text": "Dario Wren scores brilliantly from a 0.15 xG chance, lifting NOR’s total xG to 0.45 and sparking excitement on the pitch!"
+  },
+  {
+   "moment": "SYN-8-516-goal",
+   "lang": "es",
+   "persona": "analyst",
+   "source": "foundry",
+   "ms": 1519,
+   "text": "Dario Wren anota con un disparo de 0.15 xG, superando expectativas; NOR incrementa su xG total a 0.45 en el partido."
+  },
+  {
+   "moment": "SYN-8-516-goal",
+   "lang": "es",
+   "persona": "casual",
+   "source": "foundry",
+   "ms": 1467,
+   "text": "¡Golazo de Dario Wren para NOR, superando las expectativas con un disparo perfecto que eleva el xG total a 0.45!"
+  },
+  {
+   "moment": "SYN-8-516-goal",
+   "lang": "it",
+   "persona": "analyst",
+   "source": "foundry",
+   "ms": 1623,
+   "text": "Al 23', Wren segna con un'occasione da 0.15 xG, portando il totale xG del NOR a 0.45, superando le aspettative."
+  },
+  {
+   "moment": "SYN-8-516-goal",
+   "lang": "it",
+   "persona": "casual",
+   "source": "foundry",
+   "ms": 1500,
+   "text": "Gol di Dario Wren! NOR sorprende con un tiro da 0.15 xG, portando il totale a 0.45 e accendendo la partita!"
+  },
+  {
+   "moment": "SYN-8-826-goal",
+   "lang": "en",
+   "persona": "analyst",
+   "source": "foundry",
+   "ms": 1643,
+   "text": "Hiro Arkwright scored for NOR, converting a 0.76 xG chance, increasing NOR's total xG to 1.28 in the match."
+  },
+  {
+   "moment": "SYN-8-826-goal",
+   "lang": "en",
+   "persona": "casual",
+   "source": "foundry",
+   "ms": 1503,
+   "text": "Hiro Arkwright scores for NOR, turning a 0.76 xG chance into a goal, boosting NOR’s total xG to 1.28!"
+  },
+  {
+   "moment": "SYN-8-826-goal",
+   "lang": "es",
+   "persona": "analyst",
+   "source": "foundry",
+   "ms": 1506,
+   "text": "Hiro Arkwright marca tras una oportunidad con xG 0.76, elevando el xG total de NOR a 1.28 en el partido."
+  },
+  {
+   "moment": "SYN-8-826-goal",
+   "lang": "es",
+   "persona": "casual",
+   "source": "foundry",
+   "ms": 1619,
+   "text": "¡Gol de Hiro Arkwright para NOR! Convirtió una ocasión clara y NOR suma un xG total de 1.28, dominando el partido con mucha intensidad."
+  },
+  {
+   "moment": "SYN-8-826-goal",
+   "lang": "it",
+   "persona": "analyst",
+   "source": "foundry",
+   "ms": 1698,
+   "text": "Al 23', Hiro Arkwright segna con un'occasione da 0.76 xG, portando il totale xG del NOR a 1.28."
+  },
+  {
+   "moment": "SYN-8-826-goal",
+   "lang": "it",
+   "persona": "casual",
+   "source": "foundry",
+   "ms": 1498,
+   "text": "Gol di Hiro Arkwright! NOR avanza con un 1-0 e un xG totale di 1.28, partita che si accende!"
+  },
+  {
+   "moment": "SYN-8-930-goal",
+   "lang": "en",
+   "persona": "analyst",
+   "source": "foundry",
+   "ms": 1446,
+   "text": "Eli Lorne scores from a 0.18 xG opportunity, increasing SOU's total expected goals to 1.64 in the match."
+  },
+  {
+   "moment": "SYN-8-930-goal",
+   "lang": "en",
+   "persona": "casual",
+   "source": "foundry",
+   "ms": 1417,
+   "text": "Eli Lorne scores for SOU, turning a tight 0.18 xG chance into a goal, lifting their total xG to 1.64—what a moment!"
+  },
+  {
+   "moment": "SYN-8-930-goal",
+   "lang": "es",
+   "persona": "analyst",
+   "source": "foundry",
+   "ms": 5356,
+   "text": "Eli Lorne marca tras una oportunidad con xG 0.18, elevando el xG total de SOU a 1.64 en el partido."
+  },
+  {
+   "moment": "SYN-8-930-goal",
+   "lang": "es",
+   "persona": "casual",
+   "source": "foundry",
+   "ms": 5276,
+   "text": "¡Gol de Eli Lorne para SOU, aprovechando su oportunidad con 0.18 xG; SOU suma ya 1.64 xG en total!"
+  },
+  {
+   "moment": "SYN-8-930-goal",
+   "lang": "it",
+   "persona": "analyst",
+   "source": "template",
+   "ms": 4536,
+   "text": "Eli Lorne converts a 0.18 xG chance; SOU total xG now 1.64."
+  },
+  {
+   "moment": "SYN-8-930-goal",
+   "lang": "it",
+   "persona": "casual",
+   "source": "foundry",
+   "ms": 1516,
+   "text": "Eli Lorne segna con freddezza, SOU porta il vantaggio a 1.64 xG, partita che si accende!"
+  }
+ ]
+}

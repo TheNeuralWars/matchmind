@@ -18,7 +18,7 @@ except Exception:  # ImportError, or a broken install
     AVAILABLE = False
 
 INSTRUCTIONS = ("You are MatchMind, a football match analyst for a SYNTHETIC match. Use the tools for every fact; never invent "
-                "numbers. Explain WHY moments matter. Answer in the user's language (en/es/it).")
+                "numbers. Explain WHY moments matter. Always answer in the same language as the question (English, Spanish or Italian).")
 
 # Plain, typed callables: Agent Framework turns them into function tools from their signature + docstring.
 def get_score(seed: Annotated[int, "Synthetic match seed"] = 8, minute: Annotated[Optional[float], "Game minute; omit for full time"] = None) -> str:
@@ -42,13 +42,21 @@ def explain_moment(moment_id: Annotated[str, "id from get_key_moments"], lang: A
 TOOL_FUNCS = [get_score, get_momentum, get_key_moments, explain_moment]
 
 def _default_client():
-    from agent_framework.azure import AzureOpenAIChatClient  # optional
-    kw = {k: v for k, v in {"endpoint": os.getenv("AZURE_OPENAI_ENDPOINT"), "api_key": os.getenv("AZURE_OPENAI_API_KEY"),
-                            "deployment_name": os.getenv("AZURE_OPENAI_DEPLOYMENT") or os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT_NAME")}.items() if v}
-    if "api_key" not in kw:
+    ep, key = os.getenv("AZURE_OPENAI_ENDPOINT"), os.getenv("AZURE_OPENAI_API_KEY")
+    dep = os.getenv("AZURE_OPENAI_DEPLOYMENT") or os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT_NAME")
+    cred = None
+    if not key:
         from azure.identity import AzureCliCredential
-        kw["credential"] = AzureCliCredential()
-    return AzureOpenAIChatClient(**kw)
+        cred = AzureCliCredential()
+    try:  # agent-framework >= 1.x: one OpenAI chat-completions client with Azure routing
+        from agent_framework.openai import OpenAIChatCompletionClient
+        kw = {k: v for k, v in {"model": dep, "azure_endpoint": ep, "api_key": key, "credential": cred,
+                                "api_version": os.getenv("AZURE_OPENAI_API_VERSION", "2024-10-21")}.items() if v}
+        return OpenAIChatCompletionClient(**kw)
+    except ImportError:  # earlier previews
+        from agent_framework.azure import AzureOpenAIChatClient
+        kw = {k: v for k, v in {"endpoint": ep, "api_key": key, "credential": cred, "deployment_name": dep}.items() if v}
+        return AzureOpenAIChatClient(**kw)
 
 def build_agent(chat_client=None, name="MatchMind"):
     """Return an Agent Framework agent wired to MatchMind tools. Raises RuntimeError if agent-framework isn't installed."""

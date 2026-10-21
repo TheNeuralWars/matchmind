@@ -48,7 +48,7 @@ class NarratorAgent:
     def narrate(self, insight, persona, lang="en"):
         lang = norm(lang)
         style = "data-rich, precise, cite numbers" if persona == "analyst" else "short, warm, exciting, no jargon"
-        txt = chat(f"You are a football match narrator. Style: {style}. Language: {self.LANG_NAME[lang]}. One sentence, max 30 words. Only use facts provided.", insight["why"])
+        txt = chat(f"You are a football match narrator. Style: {style}. Language: {self.LANG_NAME[lang]}. One sentence, max 30 words. Only use facts provided. Clubs and players are fictional: keep team codes and names exactly as given, never expand them to real clubs.", insight["why"])
         if txt: return txt, "foundry"
         if "params" not in insight: return insight["why"], "template"
         return render(insight["kind"], insight["params"], lang, "casual" if persona == "casual" else "analyst"), "template"
