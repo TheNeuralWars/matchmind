@@ -21,6 +21,13 @@ class Server(unittest.TestCase):
         self.assertEqual(json.loads(self.get("/health")), {"ok": True})
         html = self.get("/")
         for l in ("en", "es", "it"): self.assertIn(f"<option>{l}</option>", html)
+        for frag in ('id="pitch"', 'id="chart"', "addEventListener('shot'", 'id="mline"'): self.assertIn(frag, html)
+    def test_shot_events(self):
+        ev = self.events("en")
+        shots = [d for e, d in ev if e == "shot"]
+        self.assertTrue(shots and all(0 <= s["x"] <= 105 and 0 <= s["y"] <= 68 and 0 < s["xg"] < 1 for s in shots))
+        final = [d for e, d in ev if e == "state"][-1]["score"]
+        self.assertEqual(sum(s["outcome"] == "goal" for s in shots), sum(final.values()))
     def test_language_switch(self):
         recaps = {"es": "Final del partido", "it": "Triplice fischio", "en": "Full time"}
         texts = {}

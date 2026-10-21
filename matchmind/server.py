@@ -1,4 +1,4 @@
-"""Tiny stdlib HTTP server: GET / (overlay demo UI), GET /stream?seed=&persona=&club=&lang=&speed= (SSE), GET /health."""
+"""Tiny stdlib HTTP server: GET / (overlay demo UI), GET /stream?seed=&persona=&club=&lang=&speed= (SSE: meta/state/shot/cue/recap), GET /health."""
 import json, os, time
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
@@ -26,6 +26,8 @@ class H(BaseHTTPRequestHandler):
                     time.sleep(max(0, (e["t"] - last_t) / speed)); last_t = e["t"]
                     st, out = o.step(e)
                     self._sse("state", st)
+                    if e["type"] == "shot":
+                        self._sse("shot", {k: e.get(k) for k in ("t", "minute", "team", "player", "x", "y", "xg", "outcome")} | {"set_piece": e["meta"].get("set_piece")})
                     for cue in out["me"]: self._sse("cue", cue)
                 self._sse("recap", {"text": recap(o, prof["lang"])})
             except (BrokenPipeError, ConnectionResetError):
