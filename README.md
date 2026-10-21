@@ -14,6 +14,9 @@ events   MatchState   Explainer  Renderer   Personalizer (+ Narrator)
 - **Explainability metrics**: momentum (−1..1), control-vs-chaos index, xG, progressive passes, pass accuracy.
 - **Live demo UI** (`web/index.html`) via Server-Sent Events; same match, two genuinely different experiences (analyst vs casual fan).
 
+**▶ Try it now (free static replay):** https://theneuralwars.github.io/matchmind/?autostart=1&view=split&seed=8&lang=en&lang2=it
+It shows precomputed replays of the real pipeline (template narration) and is rebuilt by GitHub Actions on every push via `python -m matchmind.static_export`. Submission text: [docs/SUBMISSION.md](docs/SUBMISSION.md).
+
 ## Quickstart
 Requires only **Python 3.9+**. There are no dependencies and no API keys, and everything runs offline at $0.
 ```bash
