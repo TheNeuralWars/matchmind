@@ -14,6 +14,7 @@ svg{width:100%;height:auto;background:#123d22;border-radius:8px}#chart{backgroun
 .lg b{display:inline-block;width:10px;height:10px;border-radius:50%;margin:0 4px 0 10px;vertical-align:middle}
 small{opacity:.6}.split-only{display:none}body.split .split-only{display:inline}body.split .single-only{display:none}</style></head><body>
 <h2>MatchMind — synthetic match insights <small id="vt"></small></h2>
+<p id="staticnote" style="display:none;margin:-6px 0 10px;font-size:13px;opacity:.75">Static replay build (precomputed by the same pipeline; template narration, no live model). Seeds: <span id="seedlist"></span> · <a style="color:#4cf" href="https://github.com/TheNeuralWars/matchmind">source</a></p>
 <div class="bar"><label>seed <input id="seed" value="8" size="3"></label>
 <select id="view"><option value="single">Single view</option><option value="split">Split: analyst vs casual</option></select>
 <span class="single-only"><select id="persona"><option value="casual">Casual fan</option><option value="analyst">Analyst</option></select></span>
@@ -40,8 +41,16 @@ small{opacity:.6}.split-only{display:none}body.split .split-only{display:inline}
 const COL={},SVGNS='http://www.w3.org/2000/svg';let streams=[],H,A,pts=[];
 function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e}
 function reset(){streams.forEach(s=>s.close());streams=[];for(const id of['cues1','cues2','recap1','recap2','shots','gmarks'])document.getElementById(id).innerHTML='';pts=[];mline.setAttribute('points','')}
+// Static mode (GitHub Pages): replay precomputed JSON on the same timeline the SSE server would use.
+class Replay{constructor(seedV,prof,speedV){this.h={};this.timers=[];const c=prof.club||'none',sp=Math.max(1,+speedV||120);
+ Promise.all([`replay/${seedV}/base.json`,`replay/${seedV}/${prof.persona}-${prof.lang}-${c}.json`].map(u=>fetch(u).then(r=>{if(!r.ok)throw Error(u);return r.json()})))
+ .then(([b,p])=>{for(const [t,ev,d] of b.concat(p).sort((x,y)=>x[0]-y[0]))this.timers.push(setTimeout(()=>this.emit(ev,d),t*1000/sp))})
+ .catch(()=>{info.textContent='No precomputed replay for seed '+seedV+' — try one of: '+(window.MATCHMIND_STATIC.seeds||[]).join(', ')})}
+ addEventListener(ev,fn){(this.h[ev]=this.h[ev]||[]).push(fn)} emit(ev,d){(this.h[ev]||[]).forEach(fn=>fn({data:JSON.stringify(d)}))}
+ close(){this.timers.forEach(clearTimeout);this.timers=[]}}
 function open(prof,cuesEl,recapEl,primary){
- const q=new URLSearchParams({seed:seed.value,club:club.value,speed:speed.value,...prof});const es=new EventSource('/stream?'+q);streams.push(es);
+ const q=new URLSearchParams({seed:seed.value,club:club.value,speed:speed.value,...prof});
+ const es=window.MATCHMIND_STATIC?new Replay(seed.value,{...prof,club:club.value},speed.value):new EventSource('/stream?'+q);streams.push(es);
  es.addEventListener('meta',e=>{const m=JSON.parse(e.data);H=m.home;A=m.away;COL[H]='#4cf';COL[A]='#fb4';
   legend.innerHTML=`<b style="background:${COL[H]}"></b>${H} →<b style="background:${COL[A]}"></b>${A} ←`;hl.textContent=H+' ↑';al.textContent=A+' ↓'});
  if(primary){
@@ -60,6 +69,7 @@ function go(){reset();const split=view.value==='split';document.body.classList.t
  vt.textContent=split?'· same match, two fans':'';
  if(split){p1h.textContent='Analyst';open({persona:'analyst',lang:lang.value},cues1,recap1,true);open({persona:'casual',lang:lang2.value},cues2,recap2,false)}
  else{p1h.textContent=persona.options[persona.selectedIndex].text;open({persona:persona.value,lang:lang.value},cues1,recap1,true)}}
+if(window.MATCHMIND_STATIC){staticnote.style.display='block';seedlist.textContent=window.MATCHMIND_STATIC.seeds.join(', ')}
 view.onchange=()=>document.body.classList.toggle('split',view.value==='split');
 // Deep link for demos/screenshots: /?autostart=1&view=split&seed=8&lang=en&lang2=it&speed=600
 {const u=new URLSearchParams(location.search);for(const k of['seed','view','persona','club','lang','lang2','speed'])if(u.has(k))document.getElementById(k).value=u.get(k);
