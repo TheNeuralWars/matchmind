@@ -21,15 +21,15 @@ INSTRUCTIONS = ("You are MatchMind, a football match analyst for a SYNTHETIC mat
                 "numbers. Explain WHY moments matter. Answer in the user's language (en/es/it).")
 
 # Plain, typed callables: Agent Framework turns them into function tools from their signature + docstring.
-def get_score(seed: Annotated[int, "Synthetic match seed"] = 7, minute: Annotated[Optional[float], "Game minute; omit for full time"] = None) -> str:
+def get_score(seed: Annotated[int, "Synthetic match seed"] = 8, minute: Annotated[Optional[float], "Game minute; omit for full time"] = None) -> str:
     """Score, xG and possession of a synthetic match at a given minute."""
     return json.dumps(T.get_score(seed, minute))
 
-def get_momentum(seed: Annotated[int, "Synthetic match seed"] = 7, minute: Annotated[Optional[float], "Game minute; omit for full time"] = None) -> str:
+def get_momentum(seed: Annotated[int, "Synthetic match seed"] = 8, minute: Annotated[Optional[float], "Game minute; omit for full time"] = None) -> str:
     """Momentum (-1..1, positive = home on top) and control-vs-chaos index."""
     return json.dumps(T.get_momentum(seed, minute))
 
-def get_key_moments(seed: Annotated[int, "Synthetic match seed"] = 7, minute: Annotated[Optional[float], "Up to this minute"] = None,
+def get_key_moments(seed: Annotated[int, "Synthetic match seed"] = 8, minute: Annotated[Optional[float], "Up to this minute"] = None,
                     limit: Annotated[int, "Max moments"] = 20) -> str:
     """Key moments detected by the Analyst agent (goals, big chances, penalties, red cards, momentum swings)."""
     return json.dumps(T.get_key_moments(seed, minute, limit=limit), ensure_ascii=False)

@@ -1,6 +1,6 @@
 """Match-state tools shared by the MCP server and the Agent Framework adapter. Pure functions, JSON-serialisable outputs."""
 from functools import lru_cache
-from .generator import generate_match
+from .generator import generate_match, DEMO_SEED
 from .state import MatchState
 from .agents import AnalystAgent, ExplainerAgent, NarratorAgent
 from .i18n import norm
@@ -32,18 +32,18 @@ def _at(seed, minute):
 
 def _public(m): return {k: v for k, v in m.items() if not k.startswith("_")}
 
-def get_score(seed=7, minute=None):
+def get_score(seed=DEMO_SEED, minute=None):
     meta, st, _ = _at(seed, minute)
     return {"match_id": meta["match_id"], "minute": st["minute"], "home": meta["home"], "away": meta["away"], "score": st["score"],
             "xg": {t: st["teams"][t]["xg"] for t in st["teams"]}, "possession": st["possession"]}
 
-def get_momentum(seed=7, minute=None):
+def get_momentum(seed=DEMO_SEED, minute=None):
     meta, st, _ = _at(seed, minute)
     leader = None if st["momentum"] == 0 else (meta["home"] if st["momentum"] > 0 else meta["away"])
     return {"minute": st["minute"], "momentum": st["momentum"], "leader": leader, "chaos": st["chaos"],
             "note": "momentum in -1..1, positive = home on top over the last ~40 actions; chaos 0 = control, 1 = chaos"}
 
-def get_key_moments(seed=7, minute=None, kinds=None, min_importance=0.0, limit=20):
+def get_key_moments(seed=DEMO_SEED, minute=None, kinds=None, min_importance=0.0, limit=20):
     _, _, ms = _at(seed, minute)
     ms = [m for m in ms if m["importance"] >= float(min_importance) and (not kinds or m["kind"] in kinds)]
     return {"count": len(ms), "moments": [_public(m) for m in ms[-int(limit):]]}
@@ -57,7 +57,7 @@ def explain_moment(moment_id, lang="en", persona="analyst"):
                     "text": text, "source": src, "why_en": m["why"], "evidence": m["evidence"]}
     raise KeyError(f"unknown moment_id {moment_id}")
 
-_SEED = {"type": "integer", "description": "Synthetic match seed (deterministic)", "default": 7}
+_SEED = {"type": "integer", "description": "Synthetic match seed (deterministic)", "default": DEMO_SEED}
 _MIN = {"type": "number", "description": "Game minute to query state at; omit for full time"}
 TOOLS = {
     "get_score": (get_score, "Score, xG and possession of a synthetic match at a given minute.",
