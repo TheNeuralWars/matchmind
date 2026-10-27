@@ -1,16 +1,19 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MatchMind</title>
 <style>body{font-family:system-ui;background:#0b1020;color:#eef;margin:0;padding:20px}
 .bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}select,button,input{padding:6px;border-radius:6px}
-#sb{font-size:28px;font-weight:700}#mom{height:10px;background:#223;border-radius:5px;position:relative;margin:8px 0}
+#sb{font-size:28px;font-weight:700;min-height:1.2em}#info{display:block;min-height:1.15em}
+#mom{height:10px;background:#223;border-radius:5px;position:relative;margin:8px 0}
 #mom i{position:absolute;top:0;bottom:0;left:50%;background:#4cf;width:0}
+.cues{min-height:360px;max-height:min(70vh,560px);overflow-y:auto;contain:layout paint}
 .cues div{background:#1a2340;border-left:4px solid #4cf;margin:6px 0;padding:8px;border-radius:4px}
 .cues.casual div{border-left-color:#fb4;font-size:17px}
-.grid{display:grid;grid-template-columns:minmax(300px,1fr) minmax(300px,1fr);gap:16px}
+.grid{display:grid;grid-template-columns:minmax(300px,1fr) minmax(300px,1fr);gap:16px;align-items:start}
 body.split .grid{grid-template-columns:minmax(280px,.9fr) minmax(260px,1fr) minmax(260px,1fr)}
 @media(max-width:900px){.grid,body.split .grid{grid-template-columns:1fr}}
+.panel{min-height:420px;display:flex;flex-direction:column}
 .panel h3{margin:0 0 6px;font-size:15px;letter-spacing:.04em;text-transform:uppercase;opacity:.85}#p2{display:none}body.split #p2{display:block}
-.recap{background:#141b33;border-radius:8px;padding:10px;font-size:14px}.recap:empty{display:none}.recap .soc{margin-top:8px;padding:8px;border:1px dashed #4cf6;border-radius:6px}
-svg{width:100%;height:auto;background:#123d22;border-radius:8px}#chart{background:#141b33;margin-top:8px}.lg{font-size:12px;opacity:.8}
+.recap{background:#141b33;border-radius:8px;padding:10px;font-size:14px;min-height:0}.recap:empty{visibility:hidden;min-height:0;padding:0;margin:0}.recap .soc{margin-top:8px;padding:8px;border:1px dashed #4cf6;border-radius:6px}
+svg{width:100%;height:auto;aspect-ratio:109/72;background:#123d22;border-radius:8px;display:block}#pitch{aspect-ratio:109/72}#chart{aspect-ratio:3/1;background:#141b33;margin-top:8px}.lg{font-size:12px;opacity:.8;min-height:1.2em}
 .lg b{display:inline-block;width:10px;height:10px;border-radius:50%;margin:0 4px 0 10px;vertical-align:middle}
 small{opacity:.6}.split-only{display:none}body.split .split-only{display:inline}body.split .single-only{display:none}</style></head><body>
 <h2>MatchMind — synthetic match insights <small id="vt"></small></h2>
